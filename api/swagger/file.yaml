@@ -1,0 +1,63 @@
+swagger: "2.0"
+info:
+  title: Сервис Otusgruz
+  version: 1.0.0
+  description: API сервиса Otusgruz
+
+schemes:
+  - https
+
+basePath: /api
+
+tags:
+  - name: Other
+    description: Прочие эндпоинты
+paths:
+  /health:
+    get:
+      summary: Пинг сервиса
+      tags:
+        - Other
+      responses:
+        '200':
+          description: Успех
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
+        '500':
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  DefaultStatusResponse:
+    type: object
+    description: Дефолтный положительный ответ
+    required:
+      - message
+      - code
+    properties:
+      code:
+        type: string
+        description: 'Кодовое обозначение ответа'
+        example: "01"
+        x-omitempty: false
+        x-nullable: false
+      message:
+        type: string
+        description: 'Сообщение'
+        example: "Сообщение об успешном выполнении запроса"
+        x-omitempty: false
+        x-nullable: false
+  Error:
+    type: object
+    description: объект ошибки, обязательным является лишь поле сообщения, опционально присутствует код и ряд других полей
+    required:
+      - message
+    properties:
+      message:
+        type: string
+        description: текстовое описание ошибки
+        example: "произошла такая-то ошибка"
+      code:
+        type: integer
+        description: цифровой код ошибки
+        example: 123
