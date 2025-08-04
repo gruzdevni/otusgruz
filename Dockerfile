@@ -1,8 +1,10 @@
 FROM golang:1.24
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download all
+COPY . .
+RUN go mod download
 COPY *.go ./
 
+EXPOSE 8080
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o /otusgruz
-CMD [ "/otusgruz" ]
+CMD [ "/otusgruz", "rest" ]
