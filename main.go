@@ -8,7 +8,6 @@ import (
 	"otusgruz/config"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -19,13 +18,11 @@ func main() {
 
 	ctx := context.Background()
 
-	log.Logger = zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
-
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	logger := zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
 
 	exitCode := 0
 
-	log.Ctx(ctx).Info().Msg("the application is launching")
+	logger.Info().Msg("application is launching")
 
 	err = cmd.Run(ctx, conf)
 	if err != nil {
