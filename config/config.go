@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	App  App
-	HTTP HTTP
+	App      App
+	HTTP     HTTP
+	Postgres Postgres
 }
 
 type appEnv string

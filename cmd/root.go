@@ -18,6 +18,7 @@ func Run(ctx context.Context, conf config.Config) error {
 	}
 
 	root.AddCommand(
+		postgresCmd(ctx, conf),
 		restCmd(ctx, conf),
 	)
 
