@@ -7,10 +7,10 @@ spec:
     spec:
       containers:
       - name: migrate-postgres
-        image: nikolaygr/otusgruz:v0.2
+        image: nikolaygr/otusgruz:v0.5
         command: ["/otusgruz", "postgres", "up"]
         env:
-        - name: POSTGRES_DSN 
+        - name: POSTGRES_HOST 
           valueFrom:
             configMapKeyRef:
               name: conf-map          
@@ -24,6 +24,16 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: conf-map          
-              key: postrges_db_name
+              key: postgres_db_name
+        - name: POSTGRES_USER 
+          valueFrom:
+            configMapKeyRef:
+              name: conf-map          
+              key: postgres_user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: conf-map                  
+              key: postgres_password
       restartPolicy: Never   
   backoffLimit: 4

@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const dsnTemplate = "postgres://%s:%s@%s/%s?sslmode=disable&search_path=cashoperations"
+const dsnTemplate = "postgres://%s:%s@%s/%s?sslmode=disable"
 
 func (b *Builder) postgresClient(dsn string) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("pgx", dsn)

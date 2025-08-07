@@ -21,7 +21,10 @@ spec:
     spec:
       containers:
       - name: kuber-app
-        image: nikolaygr/otusgruz:v0.2
+        image: nikolaygr/otusgruz:v0.5
+        envFrom:
+         - configMapRef:
+            name: conf-map
         ports:
         - containerPort: 8080
         livenessProbe:
