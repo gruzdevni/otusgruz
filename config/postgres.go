@@ -3,8 +3,11 @@ package config
 import "time"
 
 type Postgres struct {
-	DSN   string `envconfig:"POSTGRES_DSN" default:"postgres://postgres@localhost:5432/?sslmode=disable"`
-	DSNRO string `envconfig:"POSTGRES_DSN_RO" default:"postgres://postgres@localhost:5432/?sslmode=disable"`
+	DsnHost     string `envconfig:"POSTGRES_HOST" default:"localhost"`
+	DsnPort     string `envconfig:"POSTGRES_PORT" default:"5432"`
+	DsnDBName   string `envconfig:"POSTGRES_DB_NAME" default:"test"`
+	DsnUser     string `envconfig:"POSTGRES_USER" default:"root"`
+	DsnPassword string `envconfig:"POSTGRES_PASSWORD" default:""`
 
 	MaxOpenConns    int           `envconfig:"POSTGRES_MAX_OPEN_CONNS" default:"10"`
 	MaxIdleConns    int           `envconfig:"POSTGRES_MAX_IDLE_CONNS" default:"7"`

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: conf-map
+data:
+  postgres_host: k8s-postgres-helm-postgresql.default.svc.cluster.local
+  postgres_port: "5432"
+  postrges_db_name: postgres

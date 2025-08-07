@@ -15,7 +15,7 @@ func (b *Builder) PostgresMigration() (*migrate.Migrate, error) {
 		return nil, errors.Wrap(err, "embed postgres migrations")
 	}
 
-	m, err := migrate.NewWithSourceInstance("iofs", d, b.config.Postgres.DSN)
+	m, err := migrate.NewWithSourceInstance("iofs", d, b.PostgresDSN())
 	if err != nil {
 		return nil, errors.Wrap(err, "apply postgres migrations")
 	}
