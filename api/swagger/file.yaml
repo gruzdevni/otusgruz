@@ -5,6 +5,7 @@ info:
   description: API сервиса Otusgruz
 
 schemes:
+  - http
   - https
 
 basePath: /api
@@ -75,6 +76,10 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
+        400:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/Error'
         200:
           description: Успешное изменение данных по пользователю
           schema:
@@ -99,6 +104,10 @@ paths:
       responses:
         500:
           description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Клиентская ошибка
           schema:
             $ref: '#/definitions/Error'
         200:

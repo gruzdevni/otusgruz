@@ -58,6 +58,51 @@ func (o *PatchUserGUIDOK) WriteResponse(rw http.ResponseWriter, producer runtime
 	}
 }
 
+// PatchUserGUIDBadRequestCode is the HTTP code returned for type PatchUserGUIDBadRequest
+const PatchUserGUIDBadRequestCode int = 400
+
+/*
+PatchUserGUIDBadRequest Клиентская ошибка
+
+swagger:response patchUserGuidBadRequest
+*/
+type PatchUserGUIDBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewPatchUserGUIDBadRequest creates PatchUserGUIDBadRequest with default headers values
+func NewPatchUserGUIDBadRequest() *PatchUserGUIDBadRequest {
+
+	return &PatchUserGUIDBadRequest{}
+}
+
+// WithPayload adds the payload to the patch user Guid bad request response
+func (o *PatchUserGUIDBadRequest) WithPayload(payload *models.Error) *PatchUserGUIDBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch user Guid bad request response
+func (o *PatchUserGUIDBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PatchUserGUIDBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PatchUserGUIDInternalServerErrorCode is the HTTP code returned for type PatchUserGUIDInternalServerError
 const PatchUserGUIDInternalServerErrorCode int = 500
 

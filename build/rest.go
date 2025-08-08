@@ -42,6 +42,15 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	api.UsercrudGetUserGUIDHandler = user_c_r_u_d.GetUserGUIDHandlerFunc(
 		handler.GetUser,
 	)
+	api.UsercrudDeleteUserGUIDHandler = user_c_r_u_d.DeleteUserGUIDHandlerFunc(
+		handler.DeleteUser,
+	)
+	api.UsercrudPatchUserGUIDHandler = user_c_r_u_d.PatchUserGUIDHandlerFunc(
+		handler.UpdateUser,
+	)
+	api.UsercrudPostUserHandler = user_c_r_u_d.PostUserHandlerFunc(
+		handler.CreateUser,
+	)
 
 	return api, swaggerSpec, nil
 }

@@ -58,6 +58,51 @@ func (o *DeleteUserGUIDOK) WriteResponse(rw http.ResponseWriter, producer runtim
 	}
 }
 
+// DeleteUserGUIDBadRequestCode is the HTTP code returned for type DeleteUserGUIDBadRequest
+const DeleteUserGUIDBadRequestCode int = 400
+
+/*
+DeleteUserGUIDBadRequest Клиентская ошибка
+
+swagger:response deleteUserGuidBadRequest
+*/
+type DeleteUserGUIDBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewDeleteUserGUIDBadRequest creates DeleteUserGUIDBadRequest with default headers values
+func NewDeleteUserGUIDBadRequest() *DeleteUserGUIDBadRequest {
+
+	return &DeleteUserGUIDBadRequest{}
+}
+
+// WithPayload adds the payload to the delete user Guid bad request response
+func (o *DeleteUserGUIDBadRequest) WithPayload(payload *models.Error) *DeleteUserGUIDBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete user Guid bad request response
+func (o *DeleteUserGUIDBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteUserGUIDBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteUserGUIDInternalServerErrorCode is the HTTP code returned for type DeleteUserGUIDInternalServerError
 const DeleteUserGUIDInternalServerErrorCode int = 500
 

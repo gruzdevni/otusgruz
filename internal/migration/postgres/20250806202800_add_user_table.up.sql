@@ -4,7 +4,7 @@ CREATE TABLE users(
     guid                UUID PRIMARY KEY        NOT NULL,
     name                VARCHAR(255)            NOT NULL,
     occupation          TEXT                    NOT NULL,
-    is_deleted          BOOLEAN                 NOT NULL,
+    is_deleted          BOOLEAN                 NOT NULL DEFAULT false,
     created_at          TIMESTAMPTZ             NOT NULL DEFAULT now(),
     updated_at          TIMESTAMPTZ             NOT NULL DEFAULT now()
 );

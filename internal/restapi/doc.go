@@ -4,6 +4,7 @@
 //
 //	API сервиса Otusgruz
 //	Schemes:
+//	  http
 //	  https
 //	Host: localhost
 //	BasePath: /api
