@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 
+	_ "github.com/jackc/pgx/stdlib" // driver
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )

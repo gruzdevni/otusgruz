@@ -8,13 +8,15 @@ import (
 	"otusgruz/internal/restapi"
 	"otusgruz/internal/restapi/operations"
 	"otusgruz/internal/restapi/operations/other"
+	"otusgruz/internal/restapi/operations/user_c_r_u_d"
+	"otusgruz/internal/service/api/user"
 
 	"github.com/go-openapi/loads"
 	mdlwr "github.com/go-openapi/runtime/middleware"
 	"github.com/pkg/errors"
 )
 
-func (b *Builder) buildAPI(ctx context.Context) (*operations.RestServerAPI, *loads.Document, error) {
+func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error) {
 	swaggerSpec, err := loads.Spec("api/swagger/file.yaml")
 	if err != nil {
 		return nil, nil, fmt.Errorf("load swagger specs: %w", err)
@@ -22,10 +24,23 @@ func (b *Builder) buildAPI(ctx context.Context) (*operations.RestServerAPI, *loa
 
 	api := operations.NewRestServerAPI(swaggerSpec)
 
-	handler := restapi.NewHandler()
+	psql, err := b.PostgresClient()
+	if err != nil {
+		return nil, nil, fmt.Errorf("creating postgres client: %w", err)
+	}
+
+	repo := b.NewRepo(psql.DB)
+
+	userSrv := user.NewService(repo)
+
+	handler := restapi.NewHandler(userSrv)
 
 	api.OtherGetHealthHandler = other.GetHealthHandlerFunc(
 		handler.GetHealth,
+	)
+
+	api.UsercrudGetUserGUIDHandler = user_c_r_u_d.GetUserGUIDHandlerFunc(
+		handler.GetUser,
 	)
 
 	return api, swaggerSpec, nil
@@ -40,7 +55,7 @@ func (b *Builder) RestAPIServer(ctx context.Context) (*http.Server, error) {
 
 	router := b.httpRouter()
 
-	api, swaggerSpec, err := b.buildAPI(ctx)
+	api, swaggerSpec, err := b.buildAPI()
 	if err != nil {
 		return nil, errors.Wrap(err, "building API")
 	}

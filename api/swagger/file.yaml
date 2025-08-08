@@ -39,6 +39,10 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
+        400:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/Error'
         200:
           description: Успешное получение данных по пользователю
           schema:

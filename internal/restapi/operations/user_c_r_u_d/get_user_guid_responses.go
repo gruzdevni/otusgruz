@@ -58,6 +58,51 @@ func (o *GetUserGUIDOK) WriteResponse(rw http.ResponseWriter, producer runtime.P
 	}
 }
 
+// GetUserGUIDBadRequestCode is the HTTP code returned for type GetUserGUIDBadRequest
+const GetUserGUIDBadRequestCode int = 400
+
+/*
+GetUserGUIDBadRequest Клиентская ошибка
+
+swagger:response getUserGuidBadRequest
+*/
+type GetUserGUIDBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewGetUserGUIDBadRequest creates GetUserGUIDBadRequest with default headers values
+func NewGetUserGUIDBadRequest() *GetUserGUIDBadRequest {
+
+	return &GetUserGUIDBadRequest{}
+}
+
+// WithPayload adds the payload to the get user Guid bad request response
+func (o *GetUserGUIDBadRequest) WithPayload(payload *models.Error) *GetUserGUIDBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get user Guid bad request response
+func (o *GetUserGUIDBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetUserGUIDBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetUserGUIDInternalServerErrorCode is the HTTP code returned for type GetUserGUIDInternalServerError
 const GetUserGUIDInternalServerErrorCode int = 500
 
