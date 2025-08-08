@@ -79,6 +79,7 @@ func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.U
 
 func (s *service) CreateUser(ctx context.Context, info *models.UserCreateParams) (*models.DefaultStatusResponse, error) {
 	err := s.repo.InsertUser(ctx, query.InsertUserParams{
+		Guid:       uuid.New(),
 		Occupation: info.Occupation,
 		Name:       info.Name,
 	})
