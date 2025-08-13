@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: conf-map
 data:
-  POSTGRES_HOST: helm-psql-postgresql.default.svc.cluster.local
+  POSTGRES_HOST: helm-psql-2-postgresql.default.svc.cluster.local
   POSTGRES_PORT: "5432"
   POSTGRES_DB_NAME: postgres
   POSTGRES_USER: postgres
