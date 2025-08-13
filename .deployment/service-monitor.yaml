@@ -9,7 +9,7 @@ spec:
   endpoints:
     - port: metrics
       scrapeTimeout: 30s
-      path: /actuator/prometheus     
+      path: /metrics
       honorLabels: true
       scheme: http
 #  jobLabel: stack
