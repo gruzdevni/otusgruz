@@ -20,6 +20,7 @@ import (
 	"github.com/go-openapi/swag"
 
 	"otusgruz/internal/restapi/operations/other"
+	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 )
 
 // NewRestServerAPI creates a new RestServer instance
@@ -44,8 +45,20 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		UsercrudDeleteUserGUIDHandler: user_c_r_u_d.DeleteUserGUIDHandlerFunc(func(params user_c_r_u_d.DeleteUserGUIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation user_c_r_u_d.DeleteUserGUID has not yet been implemented")
+		}),
 		OtherGetHealthHandler: other.GetHealthHandlerFunc(func(params other.GetHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation other.GetHealth has not yet been implemented")
+		}),
+		UsercrudGetUserGUIDHandler: user_c_r_u_d.GetUserGUIDHandlerFunc(func(params user_c_r_u_d.GetUserGUIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation user_c_r_u_d.GetUserGUID has not yet been implemented")
+		}),
+		UsercrudPatchUserGUIDHandler: user_c_r_u_d.PatchUserGUIDHandlerFunc(func(params user_c_r_u_d.PatchUserGUIDParams) middleware.Responder {
+			return middleware.NotImplemented("operation user_c_r_u_d.PatchUserGUID has not yet been implemented")
+		}),
+		UsercrudPostUserHandler: user_c_r_u_d.PostUserHandlerFunc(func(params user_c_r_u_d.PostUserParams) middleware.Responder {
+			return middleware.NotImplemented("operation user_c_r_u_d.PostUser has not yet been implemented")
 		}),
 	}
 }
@@ -83,8 +96,16 @@ type RestServerAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// UsercrudDeleteUserGUIDHandler sets the operation handler for the delete user GUID operation
+	UsercrudDeleteUserGUIDHandler user_c_r_u_d.DeleteUserGUIDHandler
 	// OtherGetHealthHandler sets the operation handler for the get health operation
 	OtherGetHealthHandler other.GetHealthHandler
+	// UsercrudGetUserGUIDHandler sets the operation handler for the get user GUID operation
+	UsercrudGetUserGUIDHandler user_c_r_u_d.GetUserGUIDHandler
+	// UsercrudPatchUserGUIDHandler sets the operation handler for the patch user GUID operation
+	UsercrudPatchUserGUIDHandler user_c_r_u_d.PatchUserGUIDHandler
+	// UsercrudPostUserHandler sets the operation handler for the post user operation
+	UsercrudPostUserHandler user_c_r_u_d.PostUserHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -162,8 +183,20 @@ func (o *RestServerAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.UsercrudDeleteUserGUIDHandler == nil {
+		unregistered = append(unregistered, "user_c_r_u_d.DeleteUserGUIDHandler")
+	}
 	if o.OtherGetHealthHandler == nil {
 		unregistered = append(unregistered, "other.GetHealthHandler")
+	}
+	if o.UsercrudGetUserGUIDHandler == nil {
+		unregistered = append(unregistered, "user_c_r_u_d.GetUserGUIDHandler")
+	}
+	if o.UsercrudPatchUserGUIDHandler == nil {
+		unregistered = append(unregistered, "user_c_r_u_d.PatchUserGUIDHandler")
+	}
+	if o.UsercrudPostUserHandler == nil {
+		unregistered = append(unregistered, "user_c_r_u_d.PostUserHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -253,10 +286,26 @@ func (o *RestServerAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/user/{guid}"] = user_c_r_u_d.NewDeleteUserGUID(o.context, o.UsercrudDeleteUserGUIDHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/health"] = other.NewGetHealth(o.context, o.OtherGetHealthHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
+	o.handlers["GET"]["/user/{guid}"] = user_c_r_u_d.NewGetUserGUID(o.context, o.UsercrudGetUserGUIDHandler)
+	if o.handlers["PATCH"] == nil {
+		o.handlers["PATCH"] = make(map[string]http.Handler)
+	}
+	o.handlers["PATCH"]["/user/{guid}"] = user_c_r_u_d.NewPatchUserGUID(o.context, o.UsercrudPatchUserGUIDHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/user"] = user_c_r_u_d.NewPostUser(o.context, o.UsercrudPostUserHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

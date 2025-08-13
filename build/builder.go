@@ -12,6 +12,8 @@ import (
 type Builder struct {
 	config config.Config
 
+	shutdown shutdown
+
 	http struct {
 		router *mux.Router
 		server *http.Server

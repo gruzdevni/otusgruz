@@ -5,14 +5,140 @@ info:
   description: API сервиса Otusgruz
 
 schemes:
+  - http
   - https
 
 basePath: /api
 
 tags:
+  - name: User CRUD
+    description: Создание, изменение, удаление пользователя 
   - name: Other
     description: Прочие эндпоинты
+
 paths:
+  /user/{guid}:
+    get:
+      summary: Получение информации по пользователю
+      tags:
+        - User CRUD
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: guid
+          description: guid пользователя
+          required: true
+          type: string
+          format: uuid
+          x-omitempty: false
+          x-nullable: false
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: Успешное получение данных по пользователю
+          schema:
+            $ref: '#/definitions/UserData'
+    patch:
+      summary: Изменение информации по пользователю
+      tags:
+        - User CRUD
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: guid
+          description: guid пользователя
+          required: true
+          type: string
+          format: uuid
+          x-omitempty: false
+          x-nullable: false
+        - in: body
+          name: request
+          description: Параметры создания пользователя
+          required: true
+          schema:
+            $ref: '#/definitions/UserCreateParams'
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: Успешное изменение данных по пользователю
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
+    delete:
+      summary: Удаление пользователя
+      tags:
+        - User CRUD
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: guid
+          description: guid пользователя
+          required: true
+          type: string
+          format: uuid
+          x-omitempty: false
+          x-nullable: false
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        400:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: Успешное удаление пользователя
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
+  /user:
+    post:
+      summary: Создание пользователя
+      tags:
+        - User CRUD
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          description: Параметры создания пользователя
+          required: true
+          schema:
+            $ref: '#/definitions/UserCreateParams'
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: Успешное создание пользователя
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
   /health:
     get:
       summary: Пинг сервиса
@@ -28,6 +154,54 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 definitions:
+  UserCreateParams:
+    type: object
+    description: Параметры создания пользователя
+    required:
+      - name
+      - occupation
+    properties:
+      name:
+        type: string
+        description: 'Имя пользователя'
+        example: "Дроздобород Эдуард"
+        x-omitempty: false
+        x-nullable: false
+      occupation:
+        type: string
+        description: 'Место работы'
+        example: "МУП ДЭС"
+        x-omitempty: false
+        x-nullable: false
+  UserData:
+    type: object
+    description: Параметры создания пользователя
+    required:
+      - name
+      - occupation
+    properties:
+      guid:
+        type: string
+        format: uuid
+        x-omitempty: false
+        x-nullable: false
+      name:
+        type: string
+        description: 'Имя пользователя'
+        example: "Дроздобород Эдуард"
+        x-omitempty: false
+        x-nullable: false
+      occupation:
+        type: string
+        description: 'Место работы'
+        example: "МУП ДЭС"
+        x-omitempty: false
+        x-nullable: false
+      is_deleted:
+        type: boolean
+        description: 'Признак удален ли пользователь'
+        x-omitempty: false
+        x-nullable: false
   DefaultStatusResponse:
     type: object
     description: Дефолтный положительный ответ
