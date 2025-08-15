@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
       - name: migrate-postgres
-        image: nikolaygr/otusgruz:v0.9
+        image: nikolaygr/otusgruz:v0.11
         command: ["/otusgruz", "postgres", "up"]
         envFrom:
          - configMapRef:
@@ -16,7 +16,7 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: helm-psql-postgresql               
+              name: helm-psql-2-postgresql
               key: postgres-password
       restartPolicy: Never   
   backoffLimit: 4

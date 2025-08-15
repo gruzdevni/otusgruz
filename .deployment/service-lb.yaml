@@ -2,11 +2,16 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kuber-service-lb
+  labels:
+    app: kuber-service-lb
 spec:
   selector:
     env: v1
   ports:
     - protocol: TCP
+      name: web
       port: 80
       targetPort: 8080
+    - name: metrics
+      port: 8080
   type: LoadBalancer

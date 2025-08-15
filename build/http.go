@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 )
 
@@ -15,6 +16,7 @@ func (b *Builder) HTTPServer(ctx context.Context) (*http.Server, error) {
 	const timeout = time.Millisecond * 25
 
 	router := b.httpRouter()
+	router.Handle(metricsEndpoint, promhttp.HandlerFor(b.prometheus(), promhttp.HandlerOpts{})) //nolint:exhaustruct
 
 	//nolint:exhaustruct
 	server := http.Server{

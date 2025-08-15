@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
 	"otusgruz/internal/restapi"
 	"otusgruz/internal/restapi/operations"
 	"otusgruz/internal/restapi/operations/other"
@@ -72,7 +71,12 @@ func (b *Builder) RestAPIServer(ctx context.Context) (*http.Server, error) {
 	apiEndpoint := swaggerSpec.BasePath()
 	apiRouter := router.Name("api").Subrouter()
 
-	next := next(router)
+	metricsMW, err := NewRouter(b.config.App.Name, b.prometheusRegistry, router, api)
+	if err != nil {
+		return nil, fmt.Errorf("creating metrics middleware: %w", err)
+	}
+
+	apiRouter.Use(metricsMW)
 
 	swaggerUIOpts := mdlwr.SwaggerUIOpts{ //nolint:exhaustruct
 		BasePath: apiEndpoint,
@@ -88,19 +92,11 @@ func (b *Builder) RestAPIServer(ctx context.Context) (*http.Server, error) {
 				swaggerSpec.Raw(),
 				mdlwr.SwaggerUI(
 					swaggerUIOpts,
-					api.Context().RoutesHandler(next),
+					api.Context().RoutesHandler(metricsMW),
 				),
 			)
 		}(),
 	)
 
 	return server, nil
-}
-
-func next(next http.Handler) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r)
-		})
-	}
 }
