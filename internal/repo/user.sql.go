@@ -21,7 +21,7 @@ func (q *Queries) DeleteUser(ctx context.Context, guid uuid.UUID) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT guid, name, occupation, is_deleted, created_at, updated_at FROM users WHERE guid = $1
+SELECT guid, name, occupation, is_deleted, created_at, updated_at, pwd, email FROM users WHERE guid = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, guid uuid.UUID) (User, error) {
@@ -34,22 +34,52 @@ func (q *Queries) GetUser(ctx context.Context, guid uuid.UUID) (User, error) {
 		&i.IsDeleted,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Pwd,
+		&i.Email,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT guid, name, occupation, is_deleted, created_at, updated_at, pwd, email FROM users WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.queryRow(ctx, q.getUserByEmailStmt, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.Guid,
+		&i.Name,
+		&i.Occupation,
+		&i.IsDeleted,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Pwd,
+		&i.Email,
 	)
 	return i, err
 }
 
 const insertUser = `-- name: InsertUser :exec
-INSERT INTO users (guid, name, occupation, created_at, updated_at) VALUES ($1, $2, $3, now(), now())
+INSERT INTO users (guid, name, occupation, email, pwd, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, now(), now())
 `
 
 type InsertUserParams struct {
 	Guid       uuid.UUID
 	Name       string
 	Occupation string
+	Email      string
+	Pwd        string
 }
 
 func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) error {
-	_, err := q.exec(ctx, q.insertUserStmt, insertUser, arg.Guid, arg.Name, arg.Occupation)
+	_, err := q.exec(ctx, q.insertUserStmt, insertUser,
+		arg.Guid,
+		arg.Name,
+		arg.Occupation,
+		arg.Email,
+		arg.Pwd,
+	)
 	return err
 }
 

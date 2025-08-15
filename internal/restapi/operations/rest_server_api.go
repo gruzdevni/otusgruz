@@ -48,6 +48,9 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		UsercrudDeleteUserGUIDHandler: user_c_r_u_d.DeleteUserGUIDHandlerFunc(func(params user_c_r_u_d.DeleteUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.DeleteUserGUID has not yet been implemented")
 		}),
+		OtherGetAuthHandler: other.GetAuthHandlerFunc(func(params other.GetAuthParams) middleware.Responder {
+			return middleware.NotImplemented("operation other.GetAuth has not yet been implemented")
+		}),
 		OtherGetHealthHandler: other.GetHealthHandlerFunc(func(params other.GetHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation other.GetHealth has not yet been implemented")
 		}),
@@ -56,6 +59,12 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		}),
 		UsercrudPatchUserGUIDHandler: user_c_r_u_d.PatchUserGUIDHandlerFunc(func(params user_c_r_u_d.PatchUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.PatchUserGUID has not yet been implemented")
+		}),
+		OtherPostLoginHandler: other.PostLoginHandlerFunc(func(params other.PostLoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation other.PostLogin has not yet been implemented")
+		}),
+		OtherPostSignupHandler: other.PostSignupHandlerFunc(func(params other.PostSignupParams) middleware.Responder {
+			return middleware.NotImplemented("operation other.PostSignup has not yet been implemented")
 		}),
 		UsercrudPostUserHandler: user_c_r_u_d.PostUserHandlerFunc(func(params user_c_r_u_d.PostUserParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.PostUser has not yet been implemented")
@@ -98,12 +107,18 @@ type RestServerAPI struct {
 
 	// UsercrudDeleteUserGUIDHandler sets the operation handler for the delete user GUID operation
 	UsercrudDeleteUserGUIDHandler user_c_r_u_d.DeleteUserGUIDHandler
+	// OtherGetAuthHandler sets the operation handler for the get auth operation
+	OtherGetAuthHandler other.GetAuthHandler
 	// OtherGetHealthHandler sets the operation handler for the get health operation
 	OtherGetHealthHandler other.GetHealthHandler
 	// UsercrudGetUserGUIDHandler sets the operation handler for the get user GUID operation
 	UsercrudGetUserGUIDHandler user_c_r_u_d.GetUserGUIDHandler
 	// UsercrudPatchUserGUIDHandler sets the operation handler for the patch user GUID operation
 	UsercrudPatchUserGUIDHandler user_c_r_u_d.PatchUserGUIDHandler
+	// OtherPostLoginHandler sets the operation handler for the post login operation
+	OtherPostLoginHandler other.PostLoginHandler
+	// OtherPostSignupHandler sets the operation handler for the post signup operation
+	OtherPostSignupHandler other.PostSignupHandler
 	// UsercrudPostUserHandler sets the operation handler for the post user operation
 	UsercrudPostUserHandler user_c_r_u_d.PostUserHandler
 
@@ -186,6 +201,9 @@ func (o *RestServerAPI) Validate() error {
 	if o.UsercrudDeleteUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.DeleteUserGUIDHandler")
 	}
+	if o.OtherGetAuthHandler == nil {
+		unregistered = append(unregistered, "other.GetAuthHandler")
+	}
 	if o.OtherGetHealthHandler == nil {
 		unregistered = append(unregistered, "other.GetHealthHandler")
 	}
@@ -194,6 +212,12 @@ func (o *RestServerAPI) Validate() error {
 	}
 	if o.UsercrudPatchUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.PatchUserGUIDHandler")
+	}
+	if o.OtherPostLoginHandler == nil {
+		unregistered = append(unregistered, "other.PostLoginHandler")
+	}
+	if o.OtherPostSignupHandler == nil {
+		unregistered = append(unregistered, "other.PostSignupHandler")
 	}
 	if o.UsercrudPostUserHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.PostUserHandler")
@@ -293,6 +317,10 @@ func (o *RestServerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/auth"] = other.NewGetAuth(o.context, o.OtherGetAuthHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/health"] = other.NewGetHealth(o.context, o.OtherGetHealthHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
@@ -302,6 +330,14 @@ func (o *RestServerAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/user/{guid}"] = user_c_r_u_d.NewPatchUserGUID(o.context, o.UsercrudPatchUserGUIDHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/login"] = other.NewPostLogin(o.context, o.OtherPostLoginHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/signup"] = other.NewPostSignup(o.context, o.OtherPostSignupHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

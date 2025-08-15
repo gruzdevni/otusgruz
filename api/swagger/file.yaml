@@ -44,6 +44,10 @@ paths:
           description: Клиентская ошибка
           schema:
             $ref: '#/definitions/Error'
+        403:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
         200:
           description: Успешное получение данных по пользователю
           schema:
@@ -80,6 +84,10 @@ paths:
           description: Клиентская ошибка
           schema:
             $ref: '#/definitions/Error'
+        403:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
         200:
           description: Успешное изменение данных по пользователю
           schema:
@@ -106,6 +114,10 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
+        403:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
         400:
           description: Клиентская ошибка
           schema:
@@ -135,6 +147,10 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
+        403:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
         200:
           description: Успешное создание пользователя
           schema:
@@ -153,7 +169,106 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
+  /auth:
+    get:
+      summary: Проверка авторизации пользователя
+      tags:
+        - Other
+      parameters:
+        - name: X-User
+          in: header
+          description: Гуид пользователя
+          type: string
+      responses:
+        '200':
+          description: Успех
+          headers:
+            X-User:
+              description: Гуид пользователя.
+              type: string
+              format: uuid
+        '401':
+          description: Клиентская ошибка
+        '500':
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+  /login:
+    post:
+      summary: Логин пользователя
+      tags:
+        - Other
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          description: Параметры логина
+          required: true
+          schema:
+            $ref: '#/definitions/UserLogin'
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
+        200:
+          description: Успешный логин
+          headers:
+            X-User:
+              description: Гуид пользователя.
+              type: string
+              format: uuid
+  /signup:
+    post:
+      summary: Регистрация пользователя
+      tags:
+        - Other
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          description: Параметры логина
+          required: true
+          schema:
+            $ref: '#/definitions/UserLogin'
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        200:
+          description: Успешная Регистрация
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
 definitions:
+  UserLogin:
+    type: object
+    description: Параметры логина
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        description: 'Email'
+        format: email
+        x-omitempty: false
+        x-nullable: false
+      password:
+        type: string
+        description: 'Пароль'
+        x-omitempty: false
+        x-nullable: false
   UserCreateParams:
     type: object
     description: Параметры создания пользователя

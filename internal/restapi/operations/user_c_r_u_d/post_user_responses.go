@@ -58,6 +58,51 @@ func (o *PostUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Prod
 	}
 }
 
+// PostUserForbiddenCode is the HTTP code returned for type PostUserForbidden
+const PostUserForbiddenCode int = 403
+
+/*
+PostUserForbidden Клиентская ошибка
+
+swagger:response postUserForbidden
+*/
+type PostUserForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.DefaultStatusResponse `json:"body,omitempty"`
+}
+
+// NewPostUserForbidden creates PostUserForbidden with default headers values
+func NewPostUserForbidden() *PostUserForbidden {
+
+	return &PostUserForbidden{}
+}
+
+// WithPayload adds the payload to the post user forbidden response
+func (o *PostUserForbidden) WithPayload(payload *models.DefaultStatusResponse) *PostUserForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the post user forbidden response
+func (o *PostUserForbidden) SetPayload(payload *models.DefaultStatusResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PostUserForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PostUserInternalServerErrorCode is the HTTP code returned for type PostUserInternalServerError
 const PostUserInternalServerErrorCode int = 500
 

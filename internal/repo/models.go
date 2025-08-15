@@ -5,10 +5,18 @@
 package query
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type LoggedIn struct {
+	// Гуид пользователя
+	UserGuid uuid.UUID
+	// Время окончания авторизации
+	Expiry sql.NullTime
+}
 
 type User struct {
 	// GUID пользователя
@@ -23,4 +31,8 @@ type User struct {
 	CreatedAt time.Time
 	// Дата обновления
 	UpdatedAt time.Time
+	// Хэш пароля
+	Pwd string
+	// Email
+	Email string
 }

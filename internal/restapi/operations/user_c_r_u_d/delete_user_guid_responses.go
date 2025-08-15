@@ -103,6 +103,51 @@ func (o *DeleteUserGUIDBadRequest) WriteResponse(rw http.ResponseWriter, produce
 	}
 }
 
+// DeleteUserGUIDForbiddenCode is the HTTP code returned for type DeleteUserGUIDForbidden
+const DeleteUserGUIDForbiddenCode int = 403
+
+/*
+DeleteUserGUIDForbidden Клиентская ошибка
+
+swagger:response deleteUserGuidForbidden
+*/
+type DeleteUserGUIDForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.DefaultStatusResponse `json:"body,omitempty"`
+}
+
+// NewDeleteUserGUIDForbidden creates DeleteUserGUIDForbidden with default headers values
+func NewDeleteUserGUIDForbidden() *DeleteUserGUIDForbidden {
+
+	return &DeleteUserGUIDForbidden{}
+}
+
+// WithPayload adds the payload to the delete user Guid forbidden response
+func (o *DeleteUserGUIDForbidden) WithPayload(payload *models.DefaultStatusResponse) *DeleteUserGUIDForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the delete user Guid forbidden response
+func (o *DeleteUserGUIDForbidden) SetPayload(payload *models.DefaultStatusResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *DeleteUserGUIDForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // DeleteUserGUIDInternalServerErrorCode is the HTTP code returned for type DeleteUserGUIDInternalServerError
 const DeleteUserGUIDInternalServerErrorCode int = 500
 
