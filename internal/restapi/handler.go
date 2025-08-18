@@ -26,7 +26,7 @@ func NewHandler(userSrv user.Service, authSrv auth.Service) *Handler {
 	}
 }
 
-func (h *Handler) GetHealth(_ other.GetHealthParams) middleware.Responder {
+func (h *Handler) GetHealth(_ other.GetPublicHealthParams) middleware.Responder {
 	return other.NewGetHealthOK().WithPayload(&models.DefaultStatusResponse{Code: "01", Message: "OK"})
 }
 
@@ -54,7 +54,7 @@ func (h *Handler) Auth(params other.GetAuthParams) middleware.Responder {
 	return other.NewGetAuthOK().WithXUser(strfmt.UUID(authorizedGUID.String()))
 }
 
-func (h *Handler) Login(params other.PostLoginParams) middleware.Responder {
+func (h *Handler) Login(params other.PostPublicLoginParams) middleware.Responder {
 	ctx := params.HTTPRequest.Context()
 
 	loginParams := params.Request
@@ -65,13 +65,17 @@ func (h *Handler) Login(params other.PostLoginParams) middleware.Responder {
 			return other.NewPostLoginUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNotCorrectData.Error()})
 		}
 
+		if errors.Is(err, auth.ErrNoSuchUser) {
+			return other.NewPostPublicLoginNotFound().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNoSuchUser.Error()})
+		}
+
 		return other.NewPostLoginInternalServerError()
 	}
 
 	return other.NewPostLoginOK().WithXUser(strfmt.UUID(authorizedGUID.String()))
 }
 
-func (h *Handler) Signup(params other.PostSignupParams) middleware.Responder {
+func (h *Handler) Signup(params other.PostPublicSignupParams) middleware.Responder {
 	ctx := params.HTTPRequest.Context()
 
 	regParams := params.Request

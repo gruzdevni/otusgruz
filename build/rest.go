@@ -39,7 +39,7 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 
 	handler := restapi.NewHandler(userSrv, authSrv)
 
-	api.OtherGetHealthHandler = other.GetHealthHandlerFunc(
+	api.OtherGetPublicHealthHandler = other.GetPublicHealthHandlerFunc(
 		handler.GetHealth,
 	)
 
@@ -58,10 +58,10 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	api.OtherGetAuthHandler = other.GetAuthHandlerFunc(
 		handler.Auth,
 	)
-	api.OtherPostLoginHandler = other.PostLoginHandlerFunc(
+	api.OtherPostPublicLoginHandler = other.PostPublicLoginHandlerFunc(
 		handler.Login,
 	)
-	api.OtherPostSignupHandler = other.PostSignupHandlerFunc(
+	api.OtherPostPublicSignupHandler = other.PostPublicSignupHandlerFunc(
 		handler.Signup,
 	)
 

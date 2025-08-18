@@ -15,6 +15,7 @@ import (
 
 var (
 	ErrNotCorrectData   = errors.New("Not correct password or email")
+	ErrNoSuchUser       = errors.New("No such email registered")
 	ErrEmailAlreadyUsed = errors.New("Email is already registered. Please login")
 )
 
@@ -57,8 +58,8 @@ func (s *service) Auth(ctx context.Context, guid uuid.UUID) (uuid.UUID, error) {
 func (s *service) Login(ctx context.Context, email string, pwd string) (uuid.UUID, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return uuid.Nil, nil
+		if errors.Is(err, sql.ErrNoRows) {
+			return uuid.Nil, ErrNoSuchUser
 		}
 
 		return uuid.Nil, fmt.Errorf("getting user by email: %w", err)

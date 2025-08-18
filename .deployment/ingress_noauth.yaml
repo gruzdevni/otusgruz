@@ -5,14 +5,14 @@ metadata:
   namespace: default
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2/login
+    nginx.ingress.kubernetes.io/rewrite-target: /$2/public/$4
 spec:
   ingressClassName: nginx
   rules:
   - host: arch.homework
     http:
       paths:
-      - path: /otusapp/nigruzdev(/|$)(.*)/login
+      - path: /otusapp/nigruzdev(/|$)(.*)/public(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:

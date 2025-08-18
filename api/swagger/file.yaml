@@ -155,7 +155,7 @@ paths:
           description: Успешное создание пользователя
           schema:
             $ref: '#/definitions/DefaultStatusResponse'
-  /health:
+  /public/health:
     get:
       summary: Пинг сервиса
       tags:
@@ -193,7 +193,7 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
-  /login:
+  /public/login:
     post:
       summary: Логин пользователя
       tags:
@@ -214,6 +214,10 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
+        404:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
         401:
           description: Клиентская ошибка
           schema:
@@ -225,7 +229,7 @@ paths:
               description: Гуид пользователя.
               type: string
               format: uuid
-  /signup:
+  /public/signup:
     post:
       summary: Регистрация пользователя
       tags:

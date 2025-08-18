@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: kuber-app
-        image: nikolaygr/otusgruz:v0.13
+        image: nikolaygr/otusgruz:v0.14
         envFrom:
          - configMapRef:
             name: conf-map
@@ -35,7 +35,7 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /api/health
+            path: /api/public/health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 3
