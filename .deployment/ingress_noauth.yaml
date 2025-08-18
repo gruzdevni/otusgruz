@@ -1,19 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  annotations:
-    nginx.ingress.kubernetes.io/auth-url: http://auth.internal/api/auth
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-  name: kuber-ingress
+  name: kuber-ingress-noauth
   namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2/login
 spec:
   ingressClassName: nginx
   rules:
   - host: arch.homework
     http:
       paths:
-      - path: /otusapp/nigruzdev(/|$)(.*)
+      - path: /otusapp/nigruzdev(/|$)(.*)/login
         pathType: ImplementationSpecific
         backend:
           service:
