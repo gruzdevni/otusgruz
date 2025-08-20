@@ -7,9 +7,11 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 
+	"otusgruz/internal/apperr"
 	authhttp "otusgruz/internal/client/authhttp"
 	query "otusgruz/internal/repo"
 )
@@ -63,12 +65,19 @@ func (s *service) Auth(ctx context.Context, guid uuid.UUID) (uuid.UUID, error) {
 }
 
 func (s *service) Login(ctx context.Context, email string, pwd string) (uuid.UUID, error) {
+	zerolog.Ctx(ctx).Info().Msg("entered into login method")
 	resp, err := s.authClient.LoginRequest(ctx, email, pwd)
 	if err != nil {
+		if errors.Is(err, apperr.ErrNotCorrectData) {
+			return uuid.Nil, apperr.ErrNotCorrectData
+		}
+
 		return uuid.Nil, fmt.Errorf("login request: %w", err)
 	}
 
-	return uuid.UUID(resp.UserGUID), nil
+	zerolog.Ctx(ctx).Info().Any("response", resp).Msg("finished auth client request")
+
+	return resp.UserGUID, nil
 }
 
 func (s *service) Singup(ctx context.Context, email string, pwd string) error {

@@ -1,6 +1,6 @@
 package authhttp
 
-import "github.com/gofrs/uuid"
+import "github.com/google/uuid"
 
 type User struct {
 	GUID       string `json:"guid"`
@@ -20,7 +20,5 @@ type DefaultResponse struct {
 }
 
 type LoginResponse struct {
-	Status   int       `json:"status"`
 	UserGUID uuid.UUID `json:"user_guid"`
-	Errors   any       `json:"errors"`
 }

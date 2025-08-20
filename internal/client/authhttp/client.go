@@ -8,7 +8,10 @@ import (
 	"net/http"
 	"net/url"
 
+	"otusgruz/internal/apperr"
 	internalclient "otusgruz/internal/client"
+
+	"github.com/rs/zerolog"
 )
 
 const loginEndpoint = "api/login"
@@ -52,10 +55,14 @@ func (c *client) LoginRequest(ctx context.Context, email string, password string
 		return LoginResponse{}, fmt.Errorf("marshal request body: %w", err)
 	}
 
+	zerolog.Ctx(ctx).Info().Any("jsonBody of login request", string(jsonBody)).Msg("prepared login body")
+
 	path, err := url.JoinPath(c.baseURL, loginEndpoint)
 	if err != nil {
 		return LoginResponse{}, fmt.Errorf("joining path: %w", err)
 	}
+
+	zerolog.Ctx(ctx).Info().Any("path of login request", path).Msg("prepared login path")
 
 	req, err := http.NewRequestWithContext(
 		ctx,
@@ -69,21 +76,26 @@ func (c *client) LoginRequest(ctx context.Context, email string, password string
 
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, code, err := internalclient.DoJSON[withErr[LoginResponse]](c.doer, req)
+	resp, code, err := internalclient.Do(c.doer, req)
 	if err != nil {
+		zerolog.Ctx(ctx).Err(err).Any("response", resp).Msg("failed login request")
 		return LoginResponse{}, fmt.Errorf("login request error: %w, path: %s, code: %d", err, req.URL.Path, code)
 	}
 
 	if code != http.StatusOK {
-		return LoginResponse{
-			Status: resp.Status,
-			Errors: resp.Errors,
-		}, fmt.Errorf("not ok status for login request: %d, errors %v, path: %s, code: %d", resp.Status, resp.Errors, req.URL.Path, code)
+		if code == http.StatusUnauthorized {
+			return LoginResponse{}, apperr.ErrNotCorrectData
+		}
+		zerolog.Ctx(ctx).Info().Any("response", resp).Any("code", code).Msg("failed login request")
+		return LoginResponse{}, fmt.Errorf("not ok status for login request: path: %s, code: %d", req.URL.Path, code)
 	}
 
-	return LoginResponse{
-		Status:   resp.Status,
-		UserGUID: resp.Result.UserGUID,
-		Errors:   resp.Errors,
-	}, nil
+	var res LoginResponse
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		zerolog.Ctx(ctx).Info().Any("response", resp).Any("code", code).Msg("unmarshalling json")
+		return res, fmt.Errorf("unmarshalling json: %s", err)
+	}
+
+	return res, nil
 }

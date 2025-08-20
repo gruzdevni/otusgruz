@@ -3,6 +3,7 @@ package restapi
 import (
 	"errors"
 
+	"otusgruz/internal/apperr"
 	"otusgruz/internal/models"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
@@ -61,12 +62,12 @@ func (h *Handler) Login(params other.PostPublicLoginParams) middleware.Responder
 
 	authorizedGUID, err := h.authSrv.Login(ctx, loginParams.Email.String(), loginParams.Password)
 	if err != nil {
-		if errors.Is(err, auth.ErrNotCorrectData) {
-			return other.NewPostPublicLoginUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNotCorrectData.Error()})
+		if errors.Is(err, apperr.ErrNotCorrectData) {
+			return other.NewPostPublicLoginUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNotCorrectData.Error()})
 		}
 
-		if errors.Is(err, auth.ErrNoSuchUser) {
-			return other.NewPostPublicLoginNotFound().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNoSuchUser.Error()})
+		if errors.Is(err, apperr.ErrNoSuchUser) {
+			return other.NewPostPublicLoginNotFound().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNoSuchUser.Error()})
 		}
 
 		return other.NewPostPublicLoginInternalServerError()
