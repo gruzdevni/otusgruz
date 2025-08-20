@@ -62,17 +62,17 @@ func (h *Handler) Login(params other.PostPublicLoginParams) middleware.Responder
 	authorizedGUID, err := h.authSrv.Login(ctx, loginParams.Email.String(), loginParams.Password)
 	if err != nil {
 		if errors.Is(err, auth.ErrNotCorrectData) {
-			return other.NewPostLoginUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNotCorrectData.Error()})
+			return other.NewPostPublicLoginUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNotCorrectData.Error()})
 		}
 
 		if errors.Is(err, auth.ErrNoSuchUser) {
 			return other.NewPostPublicLoginNotFound().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrNoSuchUser.Error()})
 		}
 
-		return other.NewPostLoginInternalServerError()
+		return other.NewPostPublicLoginInternalServerError()
 	}
 
-	return other.NewPostLoginOK().WithXUser(strfmt.UUID(authorizedGUID.String()))
+	return other.NewPostPublicLoginOK().WithXUser(strfmt.UUID(authorizedGUID.String()))
 }
 
 func (h *Handler) Signup(params other.PostPublicSignupParams) middleware.Responder {

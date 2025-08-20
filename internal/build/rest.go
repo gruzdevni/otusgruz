@@ -34,8 +34,10 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 
 	repo := b.NewRepo(psql.DB)
 
+	authInternalClient := b.NewAuthClient(http.DefaultClient)
+
 	userSrv := user.NewService(repo)
-	authSrv := auth.NewService(repo)
+	authSrv := auth.NewService(repo, authInternalClient)
 
 	handler := restapi.NewHandler(userSrv, authSrv)
 

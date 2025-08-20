@@ -10,6 +10,7 @@ import (
 	"github.com/samber/lo"
 	"golang.org/x/crypto/bcrypt"
 
+	authhttp "otusgruz/internal/client/authhttp"
 	query "otusgruz/internal/repo"
 )
 
@@ -26,8 +27,13 @@ type repo interface {
 	InsertUser(ctx context.Context, arg query.InsertUserParams) error
 }
 
+type authClient interface {
+	LoginRequest(ctx context.Context, email string, password string) (authhttp.LoginResponse, error)
+}
+
 type service struct {
-	repo repo
+	repo       repo
+	authClient authClient
 }
 
 type Service interface {
@@ -36,9 +42,10 @@ type Service interface {
 	Singup(ctx context.Context, email string, pwd string) error
 }
 
-func NewService(repo repo) Service {
+func NewService(repo repo, authClient authClient) Service {
 	return &service{
-		repo: repo,
+		repo:       repo,
+		authClient: authClient,
 	}
 }
 
@@ -56,26 +63,12 @@ func (s *service) Auth(ctx context.Context, guid uuid.UUID) (uuid.UUID, error) {
 }
 
 func (s *service) Login(ctx context.Context, email string, pwd string) (uuid.UUID, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email)
+	resp, err := s.authClient.LoginRequest(ctx, email, pwd)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return uuid.Nil, ErrNoSuchUser
-		}
-
-		return uuid.Nil, fmt.Errorf("getting user by email: %w", err)
+		return uuid.Nil, fmt.Errorf("login request: %w", err)
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Pwd), []byte(pwd))
-	if err != nil {
-		return uuid.Nil, ErrNotCorrectData
-	}
-
-	err = s.repo.InsertSession(ctx, user.Guid)
-	if err != nil {
-		return uuid.Nil, fmt.Errorf("inserting session: %w", err)
-	}
-
-	return user.Guid, nil
+	return uuid.UUID(resp.UserGUID), nil
 }
 
 func (s *service) Singup(ctx context.Context, email string, pwd string) error {

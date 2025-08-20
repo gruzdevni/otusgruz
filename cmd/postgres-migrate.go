@@ -7,8 +7,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"otusgruz/build"
-	"otusgruz/config"
+	"otusgruz/internal/build"
+	"otusgruz/internal/config"
 )
 
 func postgresCmd(ctx context.Context, conf config.Config) *cobra.Command {

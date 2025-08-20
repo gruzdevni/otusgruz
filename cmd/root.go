@@ -3,7 +3,7 @@ package cmd
 import (
 	"context"
 
-	"otusgruz/config"
+	"otusgruz/internal/config"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

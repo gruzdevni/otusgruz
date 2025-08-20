@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"otusgruz/cmd"
-	"otusgruz/config"
+	"otusgruz/internal/config"
 
 	"github.com/rs/zerolog"
 )
