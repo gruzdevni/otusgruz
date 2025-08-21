@@ -18,8 +18,6 @@ import (
 
 type repo interface {
 	GetUserByEmail(ctx context.Context, email string) (query.User, error)
-	IsAuth(ctx context.Context, guid uuid.UUID) (query.LoggedIn, error)
-	InsertSession(ctx context.Context, userGuid uuid.UUID) error
 	InsertUser(ctx context.Context, arg query.InsertUserParams) error
 }
 
@@ -34,7 +32,6 @@ type service struct {
 }
 
 type Service interface {
-	Auth(ctx context.Context, guid uuid.UUID) (uuid.UUID, error)
 	Login(ctx context.Context, email string, pwd string) (uuid.UUID, error)
 	Singup(ctx context.Context, params models.UserSignup) (*models.DefaultStatusResponse, error)
 }
@@ -44,19 +41,6 @@ func NewService(repo repo, authClient authClient) Service {
 		repo:       repo,
 		authClient: authClient,
 	}
-}
-
-func (s *service) Auth(ctx context.Context, guid uuid.UUID) (uuid.UUID, error) {
-	isAuth, err := s.repo.IsAuth(ctx, guid)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return uuid.Nil, nil
-		}
-
-		return uuid.Nil, fmt.Errorf("checking is user auth: %w", err)
-	}
-
-	return isAuth.UserGuid, nil
 }
 
 func (s *service) Login(ctx context.Context, email string, pwd string) (uuid.UUID, error) {

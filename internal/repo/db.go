@@ -33,14 +33,8 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
 	}
-	if q.insertSessionStmt, err = db.PrepareContext(ctx, insertSession); err != nil {
-		return nil, fmt.Errorf("error preparing query InsertSession: %w", err)
-	}
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
-	}
-	if q.isAuthStmt, err = db.PrepareContext(ctx, isAuth); err != nil {
-		return nil, fmt.Errorf("error preparing query IsAuth: %w", err)
 	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
@@ -65,19 +59,9 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
 		}
 	}
-	if q.insertSessionStmt != nil {
-		if cerr := q.insertSessionStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing insertSessionStmt: %w", cerr)
-		}
-	}
 	if q.insertUserStmt != nil {
 		if cerr := q.insertUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing insertUserStmt: %w", cerr)
-		}
-	}
-	if q.isAuthStmt != nil {
-		if cerr := q.isAuthStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing isAuthStmt: %w", cerr)
 		}
 	}
 	if q.updateUserStmt != nil {
@@ -127,9 +111,7 @@ type Queries struct {
 	deleteUserStmt     *sql.Stmt
 	getUserStmt        *sql.Stmt
 	getUserByEmailStmt *sql.Stmt
-	insertSessionStmt  *sql.Stmt
 	insertUserStmt     *sql.Stmt
-	isAuthStmt         *sql.Stmt
 	updateUserStmt     *sql.Stmt
 }
 
@@ -140,9 +122,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteUserStmt:     q.deleteUserStmt,
 		getUserStmt:        q.getUserStmt,
 		getUserByEmailStmt: q.getUserByEmailStmt,
-		insertSessionStmt:  q.insertSessionStmt,
 		insertUserStmt:     q.insertUserStmt,
-		isAuthStmt:         q.isAuthStmt,
 		updateUserStmt:     q.updateUserStmt,
 	}
 }

@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: kuber-app
-        image: nikolaygr/otusgruz:v0.19
+        image: nikolaygr/otusgruz:v0.20
         envFrom:
          - configMapRef:
             name: conf-map

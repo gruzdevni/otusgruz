@@ -18,7 +18,7 @@ COMMENT ON COLUMN users.updated_at    IS 'Дата обновления';
 INSERT INTO users (
         guid,
         name,
-        email
+        email,
         occupation,
         is_deleted,
         created_at,

@@ -2,7 +2,7 @@
 SELECT * FROM users WHERE guid = @guid;
 
 -- name: InsertUser :exec
-INSERT INTO users (guid, name, occupation, email, pwd, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, now(), now());
+INSERT INTO users (guid, name, occupation, email, created_at, updated_at) VALUES ($1, $2, $3, $4, now(), now());
 
 -- name: UpdateUser :exec
 UPDATE users SET name = @name, occupation = @occupation, updated_at = now() WHERE guid = @guid;

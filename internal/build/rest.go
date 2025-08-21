@@ -54,9 +54,6 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	api.UsercrudPatchUserGUIDHandler = user_c_r_u_d.PatchUserGUIDHandlerFunc(
 		handler.UpdateUser,
 	)
-	api.OtherGetAuthHandler = other.GetAuthHandlerFunc(
-		handler.Auth,
-	)
 	api.OtherPostPublicLoginHandler = other.PostPublicLoginHandlerFunc(
 		handler.Login,
 	)

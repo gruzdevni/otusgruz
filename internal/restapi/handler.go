@@ -31,30 +31,6 @@ func (h *Handler) GetHealth(_ other.GetPublicHealthParams) middleware.Responder 
 	return other.NewGetHealthOK().WithPayload(&models.DefaultStatusResponse{Code: "01", Message: "OK"})
 }
 
-func (h *Handler) Auth(params other.GetAuthParams) middleware.Responder {
-	ctx := params.HTTPRequest.Context()
-
-	if params.XUser == nil {
-		return other.NewGetAuthUnauthorized()
-	}
-
-	userGUID, err := uuid.Parse(*params.XUser)
-	if err != nil {
-		return other.NewGetAuthUnauthorized()
-	}
-
-	authorizedGUID, err := h.authSrv.Auth(ctx, userGUID)
-	if err != nil {
-		return other.NewGetAuthInternalServerError()
-	}
-
-	if authorizedGUID == uuid.Nil {
-		return other.NewGetAuthUnauthorized()
-	}
-
-	return other.NewGetAuthOK().WithXUser(strfmt.UUID(authorizedGUID.String()))
-}
-
 func (h *Handler) Login(params other.PostPublicLoginParams) middleware.Responder {
 	ctx := params.HTTPRequest.Context()
 

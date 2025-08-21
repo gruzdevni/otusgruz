@@ -140,30 +140,6 @@ paths:
           description: Серверная ошибка
           schema:
             $ref: '#/definitions/Error'
-  /auth:
-    get:
-      summary: Проверка авторизации пользователя
-      tags:
-        - Other
-      parameters:
-        - name: X-User
-          in: header
-          description: Гуид пользователя
-          type: string
-      responses:
-        '200':
-          description: Успех
-          headers:
-            X-User:
-              description: Гуид пользователя.
-              type: string
-              format: uuid
-        '401':
-          description: Клиентская ошибка
-        '500':
-          description: Серверная ошибка
-          schema:
-            $ref: '#/definitions/Error'
   /public/login:
     post:
       summary: Логин пользователя

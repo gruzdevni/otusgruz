@@ -48,9 +48,6 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		UsercrudDeleteUserGUIDHandler: user_c_r_u_d.DeleteUserGUIDHandlerFunc(func(params user_c_r_u_d.DeleteUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.DeleteUserGUID has not yet been implemented")
 		}),
-		OtherGetAuthHandler: other.GetAuthHandlerFunc(func(params other.GetAuthParams) middleware.Responder {
-			return middleware.NotImplemented("operation other.GetAuth has not yet been implemented")
-		}),
 		OtherGetPublicHealthHandler: other.GetPublicHealthHandlerFunc(func(params other.GetPublicHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation other.GetPublicHealth has not yet been implemented")
 		}),
@@ -104,8 +101,6 @@ type RestServerAPI struct {
 
 	// UsercrudDeleteUserGUIDHandler sets the operation handler for the delete user GUID operation
 	UsercrudDeleteUserGUIDHandler user_c_r_u_d.DeleteUserGUIDHandler
-	// OtherGetAuthHandler sets the operation handler for the get auth operation
-	OtherGetAuthHandler other.GetAuthHandler
 	// OtherGetPublicHealthHandler sets the operation handler for the get public health operation
 	OtherGetPublicHealthHandler other.GetPublicHealthHandler
 	// UsercrudGetUserGUIDHandler sets the operation handler for the get user GUID operation
@@ -195,9 +190,6 @@ func (o *RestServerAPI) Validate() error {
 
 	if o.UsercrudDeleteUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.DeleteUserGUIDHandler")
-	}
-	if o.OtherGetAuthHandler == nil {
-		unregistered = append(unregistered, "other.GetAuthHandler")
 	}
 	if o.OtherGetPublicHealthHandler == nil {
 		unregistered = append(unregistered, "other.GetPublicHealthHandler")
@@ -306,10 +298,6 @@ func (o *RestServerAPI) initHandlerCache() {
 		o.handlers["DELETE"] = make(map[string]http.Handler)
 	}
 	o.handlers["DELETE"]["/user/{guid}"] = user_c_r_u_d.NewDeleteUserGUID(o.context, o.UsercrudDeleteUserGUIDHandler)
-	if o.handlers["GET"] == nil {
-		o.handlers["GET"] = make(map[string]http.Handler)
-	}
-	o.handlers["GET"]["/auth"] = other.NewGetAuth(o.context, o.OtherGetAuthHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
