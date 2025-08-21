@@ -66,9 +66,6 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		OtherPostPublicSignupHandler: other.PostPublicSignupHandlerFunc(func(params other.PostPublicSignupParams) middleware.Responder {
 			return middleware.NotImplemented("operation other.PostPublicSignup has not yet been implemented")
 		}),
-		UsercrudPostUserHandler: user_c_r_u_d.PostUserHandlerFunc(func(params user_c_r_u_d.PostUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user_c_r_u_d.PostUser has not yet been implemented")
-		}),
 	}
 }
 
@@ -119,8 +116,6 @@ type RestServerAPI struct {
 	OtherPostPublicLoginHandler other.PostPublicLoginHandler
 	// OtherPostPublicSignupHandler sets the operation handler for the post public signup operation
 	OtherPostPublicSignupHandler other.PostPublicSignupHandler
-	// UsercrudPostUserHandler sets the operation handler for the post user operation
-	UsercrudPostUserHandler user_c_r_u_d.PostUserHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -218,9 +213,6 @@ func (o *RestServerAPI) Validate() error {
 	}
 	if o.OtherPostPublicSignupHandler == nil {
 		unregistered = append(unregistered, "other.PostPublicSignupHandler")
-	}
-	if o.UsercrudPostUserHandler == nil {
-		unregistered = append(unregistered, "user_c_r_u_d.PostUserHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -338,10 +330,6 @@ func (o *RestServerAPI) initHandlerCache() {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
 	o.handlers["POST"]["/public/signup"] = other.NewPostPublicSignup(o.context, o.OtherPostPublicSignupHandler)
-	if o.handlers["POST"] == nil {
-		o.handlers["POST"] = make(map[string]http.Handler)
-	}
-	o.handlers["POST"]["/user"] = user_c_r_u_d.NewPostUser(o.context, o.UsercrudPostUserHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

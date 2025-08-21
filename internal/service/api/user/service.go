@@ -29,8 +29,7 @@ type service struct {
 type Service interface {
 	GetUser(ctx context.Context, guid uuid.UUID) (*models.UserData, error)
 	DeleteUser(ctx context.Context, guid uuid.UUID) (*models.DefaultStatusResponse, error)
-	UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserCreateParams) (*models.DefaultStatusResponse, error)
-	CreateUser(ctx context.Context, info *models.UserCreateParams) (*models.DefaultStatusResponse, error)
+	UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserEditParams) (*models.DefaultStatusResponse, error)
 }
 
 func NewService(repo repo) Service {
@@ -77,7 +76,7 @@ func (s *service) DeleteUser(ctx context.Context, guid uuid.UUID) (*models.Defau
 	}, nil
 }
 
-func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserCreateParams) (*models.DefaultStatusResponse, error) {
+func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserEditParams) (*models.DefaultStatusResponse, error) {
 	ctxUserGUID := http.UserGUIDFromContext(ctx)
 
 	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
@@ -96,27 +95,5 @@ func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.U
 	return &models.DefaultStatusResponse{
 		Code:    "01",
 		Message: "Successfully updated",
-	}, nil
-}
-
-func (s *service) CreateUser(ctx context.Context, info *models.UserCreateParams) (*models.DefaultStatusResponse, error) {
-	ctxUserGUID := http.UserGUIDFromContext(ctx)
-
-	if ctxUserGUID == uuid.Nil {
-		return nil, ErrNoPermission
-	}
-
-	err := s.repo.InsertUser(ctx, query.InsertUserParams{
-		Guid:       uuid.New(),
-		Occupation: info.Occupation,
-		Name:       info.Name,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating user: %w", err)
-	}
-
-	return &models.DefaultStatusResponse{
-		Code:    "01",
-		Message: "Successfully created",
 	}, nil
 }

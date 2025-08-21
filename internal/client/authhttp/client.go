@@ -14,10 +14,14 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const loginEndpoint = "api/login"
+const (
+	loginEndpoint  = "api/login"
+	signupEndpoint = "api/signup"
+)
 
 type Client interface {
 	LoginRequest(ctx context.Context, email string, password string) (LoginResponse, error)
+	SignupRequest(ctx context.Context, email string, password string) (SignupResponse, error)
 }
 
 type client struct {
@@ -91,6 +95,64 @@ func (c *client) LoginRequest(ctx context.Context, email string, password string
 	}
 
 	var res LoginResponse
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		zerolog.Ctx(ctx).Info().Any("response", resp).Any("code", code).Msg("unmarshalling json")
+		return res, fmt.Errorf("unmarshalling json: %s", err)
+	}
+
+	return res, nil
+}
+
+func (c *client) SignupRequest(ctx context.Context, email string, password string) (SignupResponse, error) {
+	type signup struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	requestBody := signup{Email: email, Password: password}
+
+	jsonBody, err := json.Marshal(requestBody)
+	if err != nil {
+		return SignupResponse{}, fmt.Errorf("marshal request body: %w", err)
+	}
+
+	zerolog.Ctx(ctx).Info().Any("jsonBody of Signup request", string(jsonBody)).Msg("prepared Signup body")
+
+	path, err := url.JoinPath(c.baseURL, signupEndpoint)
+	if err != nil {
+		return SignupResponse{}, fmt.Errorf("joining path: %w", err)
+	}
+
+	zerolog.Ctx(ctx).Info().Any("path of Signup request", path).Msg("prepared Signup path")
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodPost,
+		path,
+		bytes.NewReader(jsonBody),
+	)
+	if err != nil {
+		return SignupResponse{}, fmt.Errorf("create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, code, err := internalclient.Do(c.doer, req)
+	if err != nil {
+		zerolog.Ctx(ctx).Err(err).Any("response", resp).Msg("failed Signup request")
+		return SignupResponse{}, fmt.Errorf("Signup request error: %w, path: %s, code: %d", err, req.URL.Path, code)
+	}
+
+	if code != http.StatusOK {
+		if code == http.StatusUnauthorized {
+			return SignupResponse{}, apperr.ErrNotCorrectData
+		}
+		zerolog.Ctx(ctx).Info().Any("response", resp).Any("code", code).Msg("failed Signup request")
+		return SignupResponse{}, fmt.Errorf("not ok status for Signup request: path: %s, code: %d", req.URL.Path, code)
+	}
+
+	var res SignupResponse
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		zerolog.Ctx(ctx).Info().Any("response", resp).Any("code", code).Msg("unmarshalling json")

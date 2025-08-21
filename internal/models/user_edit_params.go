@@ -14,10 +14,10 @@ import (
 	"github.com/go-openapi/validate"
 )
 
-// UserCreateParams Параметры создания пользователя
+// UserEditParams Параметры редактирования пользователя
 //
-// swagger:model UserCreateParams
-type UserCreateParams struct {
+// swagger:model UserEditParams
+type UserEditParams struct {
 
 	// Имя пользователя
 	// Example: Дроздобород Эдуард
@@ -30,8 +30,8 @@ type UserCreateParams struct {
 	Occupation string `json:"occupation"`
 }
 
-// Validate validates this user create params
-func (m *UserCreateParams) Validate(formats strfmt.Registry) error {
+// Validate validates this user edit params
+func (m *UserEditParams) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateName(formats); err != nil {
@@ -48,7 +48,7 @@ func (m *UserCreateParams) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UserCreateParams) validateName(formats strfmt.Registry) error {
+func (m *UserEditParams) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", m.Name); err != nil {
 		return err
@@ -57,7 +57,7 @@ func (m *UserCreateParams) validateName(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *UserCreateParams) validateOccupation(formats strfmt.Registry) error {
+func (m *UserEditParams) validateOccupation(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("occupation", "body", m.Occupation); err != nil {
 		return err
@@ -66,13 +66,13 @@ func (m *UserCreateParams) validateOccupation(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this user create params based on context it is used
-func (m *UserCreateParams) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+// ContextValidate validates this user edit params based on context it is used
+func (m *UserEditParams) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
 	return nil
 }
 
 // MarshalBinary interface implementation
-func (m *UserCreateParams) MarshalBinary() ([]byte, error) {
+func (m *UserEditParams) MarshalBinary() ([]byte, error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -80,8 +80,8 @@ func (m *UserCreateParams) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (m *UserCreateParams) UnmarshalBinary(b []byte) error {
-	var res UserCreateParams
+func (m *UserEditParams) UnmarshalBinary(b []byte) error {
+	var res UserEditParams
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

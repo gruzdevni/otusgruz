@@ -74,7 +74,7 @@ paths:
           description: Параметры создания пользователя
           required: true
           schema:
-            $ref: '#/definitions/UserCreateParams'
+            $ref: '#/definitions/UserEditParams'
       responses:
         500:
           description: Серверная ошибка
@@ -124,35 +124,6 @@ paths:
             $ref: '#/definitions/Error'
         200:
           description: Успешное удаление пользователя
-          schema:
-            $ref: '#/definitions/DefaultStatusResponse'
-  /user:
-    post:
-      summary: Создание пользователя
-      tags:
-        - User CRUD
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: body
-          name: request
-          description: Параметры создания пользователя
-          required: true
-          schema:
-            $ref: '#/definitions/UserCreateParams'
-      responses:
-        500:
-          description: Серверная ошибка
-          schema:
-            $ref: '#/definitions/Error'
-        403:
-          description: Клиентская ошибка
-          schema:
-            $ref: '#/definitions/DefaultStatusResponse'
-        200:
-          description: Успешное создание пользователя
           schema:
             $ref: '#/definitions/DefaultStatusResponse'
   /public/health:
@@ -244,17 +215,47 @@ paths:
           description: Параметры логина
           required: true
           schema:
-            $ref: '#/definitions/UserLogin'
+            $ref: '#/definitions/UserSignup'
       responses:
         500:
           description: Серверная ошибка
           schema:
-            $ref: '#/definitions/Error'
+            $ref: '#/definitions/DefaultStatusResponse'
         200:
           description: Успешная Регистрация
           schema:
             $ref: '#/definitions/DefaultStatusResponse'
 definitions:
+  UserSignup:
+    type: object
+    description: Параметры для регистрации
+    required:
+      - email
+      - password
+    properties:
+      email:
+        type: string
+        description: 'Email'
+        format: email
+        x-omitempty: false
+        x-nullable: false
+      password:
+        type: string
+        description: 'Пароль'
+        x-omitempty: false
+        x-nullable: false
+      name:
+        type: string
+        description: 'Имя пользователя'
+        example: "Дроздобород Эдуард"
+        x-omitempty: false
+        x-nullable: false
+      occupation:
+        type: string
+        description: 'Место работы'
+        example: "МУП ДЭС"
+        x-omitempty: false
+        x-nullable: false
   UserLogin:
     type: object
     description: Параметры логина
@@ -273,9 +274,9 @@ definitions:
         description: 'Пароль'
         x-omitempty: false
         x-nullable: false
-  UserCreateParams:
+  UserEditParams:
     type: object
-    description: Параметры создания пользователя
+    description: Параметры редактирования пользователя
     required:
       - name
       - occupation

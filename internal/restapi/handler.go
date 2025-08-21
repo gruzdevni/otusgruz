@@ -81,16 +81,16 @@ func (h *Handler) Signup(params other.PostPublicSignupParams) middleware.Respond
 
 	regParams := params.Request
 
-	err := h.authSrv.Singup(ctx, regParams.Email.String(), regParams.Password)
+	res, err := h.authSrv.Singup(ctx, *regParams)
 	if err != nil {
-		if errors.Is(err, auth.ErrEmailAlreadyUsed) {
-			return other.NewPostSignupOK().WithPayload(&models.DefaultStatusResponse{Message: auth.ErrEmailAlreadyUsed.Error()})
+		if errors.Is(err, apperr.ErrEmailAlreadyUsed) {
+			return other.NewPostPublicSignupOK().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrEmailAlreadyUsed.Error()})
 		}
 
-		return other.NewPostSignupInternalServerError()
+		return other.NewPostPublicSignupInternalServerError().WithPayload(&models.DefaultStatusResponse{Message: err.Error()})
 	}
 
-	return other.NewPostSignupOK()
+	return other.NewPostPublicSignupOK().WithPayload(res)
 }
 
 func (h *Handler) GetUser(params user_c_r_u_d.GetUserGUIDParams) middleware.Responder {
@@ -114,23 +114,6 @@ func (h *Handler) GetUser(params user_c_r_u_d.GetUserGUIDParams) middleware.Resp
 	}
 
 	return user_c_r_u_d.NewGetUserGUIDOK().WithPayload(res)
-}
-
-func (h *Handler) CreateUser(params user_c_r_u_d.PostUserParams) middleware.Responder {
-	var errText string
-	ctx := params.HTTPRequest.Context()
-
-	res, err := h.userSrv.CreateUser(ctx, params.Request)
-	if err != nil {
-		if errors.Is(err, user.ErrNoPermission) {
-			return user_c_r_u_d.NewPostUserForbidden().WithPayload(&models.DefaultStatusResponse{Message: user.ErrNoPermission.Error()})
-		}
-
-		errText = err.Error()
-		return user_c_r_u_d.NewPostUserInternalServerError().WithPayload(&models.Error{Code: 0o3, Message: &errText})
-	}
-
-	return user_c_r_u_d.NewPostUserOK().WithPayload(res)
 }
 
 func (h *Handler) UpdateUser(params user_c_r_u_d.PatchUserGUIDParams) middleware.Responder {

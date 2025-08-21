@@ -22,3 +22,7 @@ type DefaultResponse struct {
 type LoginResponse struct {
 	UserGUID uuid.UUID `json:"user_guid"`
 }
+
+type SignupResponse struct {
+	UserGUID uuid.UUID `json:"user_guid"`
+}

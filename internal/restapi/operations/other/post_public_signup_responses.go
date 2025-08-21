@@ -71,7 +71,7 @@ type PostPublicSignupInternalServerError struct {
 	/*
 	  In: Body
 	*/
-	Payload *models.Error `json:"body,omitempty"`
+	Payload *models.DefaultStatusResponse `json:"body,omitempty"`
 }
 
 // NewPostPublicSignupInternalServerError creates PostPublicSignupInternalServerError with default headers values
@@ -81,13 +81,13 @@ func NewPostPublicSignupInternalServerError() *PostPublicSignupInternalServerErr
 }
 
 // WithPayload adds the payload to the post public signup internal server error response
-func (o *PostPublicSignupInternalServerError) WithPayload(payload *models.Error) *PostPublicSignupInternalServerError {
+func (o *PostPublicSignupInternalServerError) WithPayload(payload *models.DefaultStatusResponse) *PostPublicSignupInternalServerError {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the post public signup internal server error response
-func (o *PostPublicSignupInternalServerError) SetPayload(payload *models.Error) {
+func (o *PostPublicSignupInternalServerError) SetPayload(payload *models.DefaultStatusResponse) {
 	o.Payload = payload
 }
 

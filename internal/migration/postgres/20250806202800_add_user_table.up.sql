@@ -1,6 +1,7 @@
 CREATE TABLE users(
     guid                UUID PRIMARY KEY        NOT NULL,
     name                VARCHAR(255)            NOT NULL,
+    email               VARCHAR(255)            NOT NULL,
     occupation          TEXT                    NOT NULL,
     is_deleted          BOOLEAN                 NOT NULL DEFAULT false,
     created_at          TIMESTAMPTZ             NOT NULL DEFAULT now(),
@@ -17,6 +18,7 @@ COMMENT ON COLUMN users.updated_at    IS 'Дата обновления';
 INSERT INTO users (
         guid,
         name,
+        email
         occupation,
         is_deleted,
         created_at,
@@ -25,6 +27,7 @@ INSERT INTO users (
 VALUES (
         '149497f4-aaf0-4881-86c7-498d191d3717',
         'Иванова Ариадна Евгеньевна',
+        'test1@mail.com',
         'МУП ДЭС',
         false,
         now(),
@@ -33,6 +36,7 @@ VALUES (
     (
         'f531286c-7d8f-4fd0-9900-8da398e371b5',
         'Степанов Эдуард',
+        'test2@mail.com',
         'МУП ДЭС',
         false,
         now(),
@@ -41,6 +45,7 @@ VALUES (
     (
         '8bff61fe-c8a1-45c7-895a-b0907c390279',
         'Сидоренко Валентин',
+        'test3@mail.com',
         'МУП ДЭС',
         false,
         now(),

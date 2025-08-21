@@ -9,17 +9,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/samber/lo"
-	"golang.org/x/crypto/bcrypt"
 
 	"otusgruz/internal/apperr"
 	authhttp "otusgruz/internal/client/authhttp"
+	"otusgruz/internal/models"
 	query "otusgruz/internal/repo"
-)
-
-var (
-	ErrNotCorrectData   = errors.New("Not correct password or email")
-	ErrNoSuchUser       = errors.New("No such email registered")
-	ErrEmailAlreadyUsed = errors.New("Email is already registered. Please login")
 )
 
 type repo interface {
@@ -31,6 +25,7 @@ type repo interface {
 
 type authClient interface {
 	LoginRequest(ctx context.Context, email string, password string) (authhttp.LoginResponse, error)
+	SignupRequest(ctx context.Context, email string, password string) (authhttp.SignupResponse, error)
 }
 
 type service struct {
@@ -41,7 +36,7 @@ type service struct {
 type Service interface {
 	Auth(ctx context.Context, guid uuid.UUID) (uuid.UUID, error)
 	Login(ctx context.Context, email string, pwd string) (uuid.UUID, error)
-	Singup(ctx context.Context, email string, pwd string) error
+	Singup(ctx context.Context, params models.UserSignup) (*models.DefaultStatusResponse, error)
 }
 
 func NewService(repo repo, authClient authClient) Service {
@@ -80,31 +75,47 @@ func (s *service) Login(ctx context.Context, email string, pwd string) (uuid.UUI
 	return resp.UserGUID, nil
 }
 
-func (s *service) Singup(ctx context.Context, email string, pwd string) error {
+func (s *service) Singup(ctx context.Context, params models.UserSignup) (*models.DefaultStatusResponse, error) {
+	zerolog.Ctx(ctx).Info().Msg("entered into Singup method")
+
+	email := string(params.Email)
+	occupation := params.Occupation
+	name := params.Name
+	pwd := params.Password
+
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil && err != sql.ErrNoRows {
-		return fmt.Errorf("getting user by email: %w", err)
+		return nil, fmt.Errorf("getting user by email: %w", err)
 	}
 
 	if !lo.IsEmpty(user) {
-		return ErrEmailAlreadyUsed
+		return nil, apperr.ErrEmailAlreadyUsed
 	}
 
-	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 8)
+	resp, err := s.authClient.SignupRequest(ctx, email, pwd)
 	if err != nil {
-		return fmt.Errorf("encrypting password: %w", err)
+		if errors.Is(err, apperr.ErrNotCorrectData) {
+			return nil, apperr.ErrNotCorrectData
+		}
+
+		return nil, fmt.Errorf("login request failed: %w", err)
 	}
+
+	zerolog.Ctx(ctx).Info().Any("response", resp).Msg("finished auth client request")
 
 	err = s.repo.InsertUser(ctx, query.InsertUserParams{
-		Guid:       uuid.New(),
-		Occupation: "",
-		Name:       "",
+		Guid:       resp.UserGUID,
+		Occupation: occupation,
+		Name:       name,
 		Email:      email,
-		Pwd:        string(hashedPwd),
 	})
 	if err != nil {
-		return fmt.Errorf("inserting user: %w", err)
+		return nil, fmt.Errorf("inserting user: %w", err)
 	}
 
-	return nil
+	return &models.DefaultStatusResponse{
+			Code:    "01",
+			Message: "Successfully created",
+		},
+		nil
 }
