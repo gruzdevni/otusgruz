@@ -48,8 +48,8 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		UsercrudDeleteUserGUIDHandler: user_c_r_u_d.DeleteUserGUIDHandlerFunc(func(params user_c_r_u_d.DeleteUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.DeleteUserGUID has not yet been implemented")
 		}),
-		OtherGetHealthHandler: other.GetHealthHandlerFunc(func(params other.GetHealthParams) middleware.Responder {
-			return middleware.NotImplemented("operation other.GetHealth has not yet been implemented")
+		OtherGetPublicHealthHandler: other.GetPublicHealthHandlerFunc(func(params other.GetPublicHealthParams) middleware.Responder {
+			return middleware.NotImplemented("operation other.GetPublicHealth has not yet been implemented")
 		}),
 		UsercrudGetUserGUIDHandler: user_c_r_u_d.GetUserGUIDHandlerFunc(func(params user_c_r_u_d.GetUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.GetUserGUID has not yet been implemented")
@@ -57,8 +57,11 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		UsercrudPatchUserGUIDHandler: user_c_r_u_d.PatchUserGUIDHandlerFunc(func(params user_c_r_u_d.PatchUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.PatchUserGUID has not yet been implemented")
 		}),
-		UsercrudPostUserHandler: user_c_r_u_d.PostUserHandlerFunc(func(params user_c_r_u_d.PostUserParams) middleware.Responder {
-			return middleware.NotImplemented("operation user_c_r_u_d.PostUser has not yet been implemented")
+		OtherPostPublicLoginHandler: other.PostPublicLoginHandlerFunc(func(params other.PostPublicLoginParams) middleware.Responder {
+			return middleware.NotImplemented("operation other.PostPublicLogin has not yet been implemented")
+		}),
+		OtherPostPublicSignupHandler: other.PostPublicSignupHandlerFunc(func(params other.PostPublicSignupParams) middleware.Responder {
+			return middleware.NotImplemented("operation other.PostPublicSignup has not yet been implemented")
 		}),
 	}
 }
@@ -98,14 +101,16 @@ type RestServerAPI struct {
 
 	// UsercrudDeleteUserGUIDHandler sets the operation handler for the delete user GUID operation
 	UsercrudDeleteUserGUIDHandler user_c_r_u_d.DeleteUserGUIDHandler
-	// OtherGetHealthHandler sets the operation handler for the get health operation
-	OtherGetHealthHandler other.GetHealthHandler
+	// OtherGetPublicHealthHandler sets the operation handler for the get public health operation
+	OtherGetPublicHealthHandler other.GetPublicHealthHandler
 	// UsercrudGetUserGUIDHandler sets the operation handler for the get user GUID operation
 	UsercrudGetUserGUIDHandler user_c_r_u_d.GetUserGUIDHandler
 	// UsercrudPatchUserGUIDHandler sets the operation handler for the patch user GUID operation
 	UsercrudPatchUserGUIDHandler user_c_r_u_d.PatchUserGUIDHandler
-	// UsercrudPostUserHandler sets the operation handler for the post user operation
-	UsercrudPostUserHandler user_c_r_u_d.PostUserHandler
+	// OtherPostPublicLoginHandler sets the operation handler for the post public login operation
+	OtherPostPublicLoginHandler other.PostPublicLoginHandler
+	// OtherPostPublicSignupHandler sets the operation handler for the post public signup operation
+	OtherPostPublicSignupHandler other.PostPublicSignupHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -186,8 +191,8 @@ func (o *RestServerAPI) Validate() error {
 	if o.UsercrudDeleteUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.DeleteUserGUIDHandler")
 	}
-	if o.OtherGetHealthHandler == nil {
-		unregistered = append(unregistered, "other.GetHealthHandler")
+	if o.OtherGetPublicHealthHandler == nil {
+		unregistered = append(unregistered, "other.GetPublicHealthHandler")
 	}
 	if o.UsercrudGetUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.GetUserGUIDHandler")
@@ -195,8 +200,11 @@ func (o *RestServerAPI) Validate() error {
 	if o.UsercrudPatchUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.PatchUserGUIDHandler")
 	}
-	if o.UsercrudPostUserHandler == nil {
-		unregistered = append(unregistered, "user_c_r_u_d.PostUserHandler")
+	if o.OtherPostPublicLoginHandler == nil {
+		unregistered = append(unregistered, "other.PostPublicLoginHandler")
+	}
+	if o.OtherPostPublicSignupHandler == nil {
+		unregistered = append(unregistered, "other.PostPublicSignupHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -293,7 +301,7 @@ func (o *RestServerAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/health"] = other.NewGetHealth(o.context, o.OtherGetHealthHandler)
+	o.handlers["GET"]["/public/health"] = other.NewGetPublicHealth(o.context, o.OtherGetPublicHealthHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -305,7 +313,11 @@ func (o *RestServerAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/user"] = user_c_r_u_d.NewPostUser(o.context, o.UsercrudPostUserHandler)
+	o.handlers["POST"]["/public/login"] = other.NewPostPublicLogin(o.context, o.OtherPostPublicLoginHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/public/signup"] = other.NewPostPublicSignup(o.context, o.OtherPostPublicSignupHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

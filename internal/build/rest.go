@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
 	"otusgruz/internal/restapi"
 	"otusgruz/internal/restapi/operations"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
+	"otusgruz/internal/service/api/auth"
 	"otusgruz/internal/service/api/user"
+
+	httpMW "otusgruz/pkg/http"
 
 	"github.com/go-openapi/loads"
 	mdlwr "github.com/go-openapi/runtime/middleware"
@@ -30,11 +34,14 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 
 	repo := b.NewRepo(psql.DB)
 
+	authInternalClient := b.NewAuthClient(http.DefaultClient)
+
 	userSrv := user.NewService(repo)
+	authSrv := auth.NewService(repo, authInternalClient)
 
-	handler := restapi.NewHandler(userSrv)
+	handler := restapi.NewHandler(userSrv, authSrv)
 
-	api.OtherGetHealthHandler = other.GetHealthHandlerFunc(
+	api.OtherGetPublicHealthHandler = other.GetPublicHealthHandlerFunc(
 		handler.GetHealth,
 	)
 
@@ -47,8 +54,11 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	api.UsercrudPatchUserGUIDHandler = user_c_r_u_d.PatchUserGUIDHandlerFunc(
 		handler.UpdateUser,
 	)
-	api.UsercrudPostUserHandler = user_c_r_u_d.PostUserHandlerFunc(
-		handler.CreateUser,
+	api.OtherPostPublicLoginHandler = other.PostPublicLoginHandlerFunc(
+		handler.Login,
+	)
+	api.OtherPostPublicSignupHandler = other.PostPublicSignupHandlerFunc(
+		handler.Signup,
 	)
 
 	return api, swaggerSpec, nil
@@ -76,7 +86,11 @@ func (b *Builder) RestAPIServer(ctx context.Context) (*http.Server, error) {
 		return nil, fmt.Errorf("creating metrics middleware: %w", err)
 	}
 
+	authMW := httpMW.NewAuthMiddleware()
+
 	apiRouter.Use(metricsMW)
+	apiRouter.Use(httpMW.HTTPRequestBodyLoggerWithContext(ctx))
+	apiRouter.Use(authMW.UserAuthorizationMiddleware)
 
 	swaggerUIOpts := mdlwr.SwaggerUIOpts{ //nolint:exhaustruct
 		BasePath: apiEndpoint,

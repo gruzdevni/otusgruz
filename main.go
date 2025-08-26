@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"otusgruz/cmd"
-	"otusgruz/config"
+	"otusgruz/internal/config"
 
 	"github.com/rs/zerolog"
 )
@@ -16,9 +16,9 @@ func main() {
 		panic(err)
 	}
 
-	ctx := context.Background()
-
 	logger := zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
+
+	ctx := logger.WithContext(context.Background())
 
 	exitCode := 0
 

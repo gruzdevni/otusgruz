@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: kuber-app
-        image: nikolaygr/otusgruz:v0.11
+        image: nikolaygr/otusgruz:v0.20
         envFrom:
          - configMapRef:
             name: conf-map
@@ -29,13 +29,13 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: helm-psql-2-postgresql               
+              name: helm-psql-3-postgresql               
               key: postgres-password
         ports:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /api/health
+            path: /api/public/health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 3

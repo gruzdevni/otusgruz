@@ -44,7 +44,7 @@ type PatchUserGUIDParams struct {
 	  Required: true
 	  In: body
 	*/
-	Request *models.UserCreateParams
+	Request *models.UserEditParams
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -63,7 +63,7 @@ func (o *PatchUserGUIDParams) BindRequest(r *http.Request, route *middleware.Mat
 
 	if runtime.HasBody(r) {
 		defer r.Body.Close()
-		var body models.UserCreateParams
+		var body models.UserEditParams
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
 			if err == io.EOF {
 				res = append(res, errors.Required("request", "body", ""))

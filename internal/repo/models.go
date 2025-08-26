@@ -14,7 +14,8 @@ type User struct {
 	// GUID пользователя
 	Guid uuid.UUID
 	// Имя пользователя
-	Name string
+	Name  string
+	Email string
 	// Место работы
 	Occupation string
 	// Признак удален ли пользователь

@@ -38,8 +38,8 @@ func configureAPI(api *operations.RestServerAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
-	if api.OtherGetHealthHandler == nil {
-		api.OtherGetHealthHandler = other.GetHealthHandlerFunc(func(params other.GetHealthParams) middleware.Responder {
+	if api.OtherGetPublicHealthHandler == nil {
+		api.OtherGetPublicHealthHandler = other.GetPublicHealthHandlerFunc(func(params other.GetPublicHealthParams) middleware.Responder {
 			return middleware.NotImplemented("operation other.GetHealth has not yet been implemented")
 		})
 	}

@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
 	}
+	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
+	}
 	if q.insertUserStmt, err = db.PrepareContext(ctx, insertUser); err != nil {
 		return nil, fmt.Errorf("error preparing query InsertUser: %w", err)
 	}
@@ -49,6 +52,11 @@ func (q *Queries) Close() error {
 	if q.getUserStmt != nil {
 		if cerr := q.getUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+		}
+	}
+	if q.getUserByEmailStmt != nil {
+		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
 		}
 	}
 	if q.insertUserStmt != nil {
@@ -98,21 +106,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db             DBTX
-	tx             *sql.Tx
-	deleteUserStmt *sql.Stmt
-	getUserStmt    *sql.Stmt
-	insertUserStmt *sql.Stmt
-	updateUserStmt *sql.Stmt
+	db                 DBTX
+	tx                 *sql.Tx
+	deleteUserStmt     *sql.Stmt
+	getUserStmt        *sql.Stmt
+	getUserByEmailStmt *sql.Stmt
+	insertUserStmt     *sql.Stmt
+	updateUserStmt     *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:             tx,
-		tx:             tx,
-		deleteUserStmt: q.deleteUserStmt,
-		getUserStmt:    q.getUserStmt,
-		insertUserStmt: q.insertUserStmt,
-		updateUserStmt: q.updateUserStmt,
+		db:                 tx,
+		tx:                 tx,
+		deleteUserStmt:     q.deleteUserStmt,
+		getUserStmt:        q.getUserStmt,
+		getUserByEmailStmt: q.getUserByEmailStmt,
+		insertUserStmt:     q.insertUserStmt,
+		updateUserStmt:     q.updateUserStmt,
 	}
 }

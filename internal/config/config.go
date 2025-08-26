@@ -10,9 +10,10 @@ import (
 )
 
 type Config struct {
-	App      App
-	HTTP     HTTP
-	Postgres Postgres
+	App          App
+	HTTP         HTTP
+	Postgres     Postgres
+	AuthInternal AuthInternal
 }
 
 type appEnv string
@@ -31,6 +32,10 @@ type App struct {
 type HTTP struct {
 	Port    int32    `envconfig:"HTTP_PORT" default:"8080"`
 	Schemes []string `envconfig:"HTTP_SCHEMES" default:"http"`
+}
+
+type AuthInternal struct {
+	HTTPAddress string `envconfig:"AUTH_HTTP_ADDRESS" default:"http://auth.internal/"`
 }
 
 func Load() (Config, error) {

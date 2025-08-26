@@ -103,6 +103,51 @@ func (o *GetUserGUIDBadRequest) WriteResponse(rw http.ResponseWriter, producer r
 	}
 }
 
+// GetUserGUIDForbiddenCode is the HTTP code returned for type GetUserGUIDForbidden
+const GetUserGUIDForbiddenCode int = 403
+
+/*
+GetUserGUIDForbidden Клиентская ошибка
+
+swagger:response getUserGuidForbidden
+*/
+type GetUserGUIDForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.DefaultStatusResponse `json:"body,omitempty"`
+}
+
+// NewGetUserGUIDForbidden creates GetUserGUIDForbidden with default headers values
+func NewGetUserGUIDForbidden() *GetUserGUIDForbidden {
+
+	return &GetUserGUIDForbidden{}
+}
+
+// WithPayload adds the payload to the get user Guid forbidden response
+func (o *GetUserGUIDForbidden) WithPayload(payload *models.DefaultStatusResponse) *GetUserGUIDForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the get user Guid forbidden response
+func (o *GetUserGUIDForbidden) SetPayload(payload *models.DefaultStatusResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *GetUserGUIDForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // GetUserGUIDInternalServerErrorCode is the HTTP code returned for type GetUserGUIDInternalServerError
 const GetUserGUIDInternalServerErrorCode int = 500
 

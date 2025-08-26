@@ -103,6 +103,51 @@ func (o *PatchUserGUIDBadRequest) WriteResponse(rw http.ResponseWriter, producer
 	}
 }
 
+// PatchUserGUIDForbiddenCode is the HTTP code returned for type PatchUserGUIDForbidden
+const PatchUserGUIDForbiddenCode int = 403
+
+/*
+PatchUserGUIDForbidden Клиентская ошибка
+
+swagger:response patchUserGuidForbidden
+*/
+type PatchUserGUIDForbidden struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.DefaultStatusResponse `json:"body,omitempty"`
+}
+
+// NewPatchUserGUIDForbidden creates PatchUserGUIDForbidden with default headers values
+func NewPatchUserGUIDForbidden() *PatchUserGUIDForbidden {
+
+	return &PatchUserGUIDForbidden{}
+}
+
+// WithPayload adds the payload to the patch user Guid forbidden response
+func (o *PatchUserGUIDForbidden) WithPayload(payload *models.DefaultStatusResponse) *PatchUserGUIDForbidden {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the patch user Guid forbidden response
+func (o *PatchUserGUIDForbidden) SetPayload(payload *models.DefaultStatusResponse) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *PatchUserGUIDForbidden) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(403)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
 // PatchUserGUIDInternalServerErrorCode is the HTTP code returned for type PatchUserGUIDInternalServerError
 const PatchUserGUIDInternalServerErrorCode int = 500
 

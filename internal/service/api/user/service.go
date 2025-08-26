@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/go-openapi/strfmt"
@@ -9,7 +10,10 @@ import (
 
 	"otusgruz/internal/models"
 	query "otusgruz/internal/repo"
+	"otusgruz/pkg/http"
 )
+
+var ErrNoPermission = errors.New("No permission to perform action")
 
 type repo interface {
 	GetUser(ctx context.Context, guid uuid.UUID) (query.User, error)
@@ -25,8 +29,7 @@ type service struct {
 type Service interface {
 	GetUser(ctx context.Context, guid uuid.UUID) (*models.UserData, error)
 	DeleteUser(ctx context.Context, guid uuid.UUID) (*models.DefaultStatusResponse, error)
-	UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserCreateParams) (*models.DefaultStatusResponse, error)
-	CreateUser(ctx context.Context, info *models.UserCreateParams) (*models.DefaultStatusResponse, error)
+	UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserEditParams) (*models.DefaultStatusResponse, error)
 }
 
 func NewService(repo repo) Service {
@@ -36,6 +39,12 @@ func NewService(repo repo) Service {
 }
 
 func (s *service) GetUser(ctx context.Context, guid uuid.UUID) (*models.UserData, error) {
+	ctxUserGUID := http.UserGUIDFromContext(ctx)
+
+	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
+		return nil, ErrNoPermission
+	}
+
 	res, err := s.repo.GetUser(ctx, guid)
 	if err != nil {
 		return nil, fmt.Errorf("getting user: %w", err)
@@ -50,6 +59,12 @@ func (s *service) GetUser(ctx context.Context, guid uuid.UUID) (*models.UserData
 }
 
 func (s *service) DeleteUser(ctx context.Context, guid uuid.UUID) (*models.DefaultStatusResponse, error) {
+	ctxUserGUID := http.UserGUIDFromContext(ctx)
+
+	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
+		return nil, ErrNoPermission
+	}
+
 	err := s.repo.DeleteUser(ctx, guid)
 	if err != nil {
 		return nil, fmt.Errorf("deleting user: %w", err)
@@ -61,7 +76,13 @@ func (s *service) DeleteUser(ctx context.Context, guid uuid.UUID) (*models.Defau
 	}, nil
 }
 
-func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserCreateParams) (*models.DefaultStatusResponse, error) {
+func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.UserEditParams) (*models.DefaultStatusResponse, error) {
+	ctxUserGUID := http.UserGUIDFromContext(ctx)
+
+	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
+		return nil, ErrNoPermission
+	}
+
 	err := s.repo.UpdateUser(ctx, query.UpdateUserParams{
 		Guid:       guid,
 		Occupation: info.Occupation,
@@ -74,21 +95,5 @@ func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.U
 	return &models.DefaultStatusResponse{
 		Code:    "01",
 		Message: "Successfully updated",
-	}, nil
-}
-
-func (s *service) CreateUser(ctx context.Context, info *models.UserCreateParams) (*models.DefaultStatusResponse, error) {
-	err := s.repo.InsertUser(ctx, query.InsertUserParams{
-		Guid:       uuid.New(),
-		Occupation: info.Occupation,
-		Name:       info.Name,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("creating user: %w", err)
-	}
-
-	return &models.DefaultStatusResponse{
-		Code:    "01",
-		Message: "Successfully created",
 	}, nil
 }
