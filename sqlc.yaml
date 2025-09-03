@@ -3,6 +3,7 @@ sql:
   - schema: "internal/migration/postgres"
     queries:
       - "internal/repo/user.sql"
+      - "internal/repo/orders.sql"
     engine: "postgresql"
     gen:
       go:
@@ -10,3 +11,8 @@ sql:
         out: "internal/repo"
         emit_prepared_queries: true
         omit_unused_structs: true
+        overrides:
+        - db_type: "pg_catalog.numeric"
+          go_type:
+            import: "github.com/shopspring/decimal"
+            type: "Decimal"

@@ -19,6 +19,7 @@ import (
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
 
+	"otusgruz/internal/restapi/operations/orders"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 )
@@ -56,6 +57,9 @@ func NewRestServerAPI(spec *loads.Document) *RestServerAPI {
 		}),
 		UsercrudPatchUserGUIDHandler: user_c_r_u_d.PatchUserGUIDHandlerFunc(func(params user_c_r_u_d.PatchUserGUIDParams) middleware.Responder {
 			return middleware.NotImplemented("operation user_c_r_u_d.PatchUserGUID has not yet been implemented")
+		}),
+		OrdersPostOrderNewHandler: orders.PostOrderNewHandlerFunc(func(params orders.PostOrderNewParams) middleware.Responder {
+			return middleware.NotImplemented("operation orders.PostOrderNew has not yet been implemented")
 		}),
 		OtherPostPublicLoginHandler: other.PostPublicLoginHandlerFunc(func(params other.PostPublicLoginParams) middleware.Responder {
 			return middleware.NotImplemented("operation other.PostPublicLogin has not yet been implemented")
@@ -107,6 +111,8 @@ type RestServerAPI struct {
 	UsercrudGetUserGUIDHandler user_c_r_u_d.GetUserGUIDHandler
 	// UsercrudPatchUserGUIDHandler sets the operation handler for the patch user GUID operation
 	UsercrudPatchUserGUIDHandler user_c_r_u_d.PatchUserGUIDHandler
+	// OrdersPostOrderNewHandler sets the operation handler for the post order new operation
+	OrdersPostOrderNewHandler orders.PostOrderNewHandler
 	// OtherPostPublicLoginHandler sets the operation handler for the post public login operation
 	OtherPostPublicLoginHandler other.PostPublicLoginHandler
 	// OtherPostPublicSignupHandler sets the operation handler for the post public signup operation
@@ -199,6 +205,9 @@ func (o *RestServerAPI) Validate() error {
 	}
 	if o.UsercrudPatchUserGUIDHandler == nil {
 		unregistered = append(unregistered, "user_c_r_u_d.PatchUserGUIDHandler")
+	}
+	if o.OrdersPostOrderNewHandler == nil {
+		unregistered = append(unregistered, "orders.PostOrderNewHandler")
 	}
 	if o.OtherPostPublicLoginHandler == nil {
 		unregistered = append(unregistered, "other.PostPublicLoginHandler")
@@ -310,6 +319,10 @@ func (o *RestServerAPI) initHandlerCache() {
 		o.handlers["PATCH"] = make(map[string]http.Handler)
 	}
 	o.handlers["PATCH"]["/user/{guid}"] = user_c_r_u_d.NewPatchUserGUID(o.context, o.UsercrudPatchUserGUIDHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/order/new"] = orders.NewPostOrderNew(o.context, o.OrdersPostOrderNewHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}

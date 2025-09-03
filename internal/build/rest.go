@@ -10,6 +10,7 @@ import (
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 	"otusgruz/internal/service/api/auth"
+	"otusgruz/internal/service/api/order"
 	"otusgruz/internal/service/api/user"
 
 	httpMW "otusgruz/pkg/http"
@@ -35,11 +36,13 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	repo := b.NewRepo(psql.DB)
 
 	authInternalClient := b.NewAuthClient(http.DefaultClient)
+	billInternalClient := b.NewBillClient(http.DefaultClient)
 
 	userSrv := user.NewService(repo)
 	authSrv := auth.NewService(repo, authInternalClient)
+	orderSrv := order.NewService(repo, billInternalClient)
 
-	handler := restapi.NewHandler(userSrv, authSrv)
+	handler := restapi.NewHandler(userSrv, authSrv, orderSrv)
 
 	api.OtherGetPublicHealthHandler = other.GetPublicHealthHandlerFunc(
 		handler.GetHealth,

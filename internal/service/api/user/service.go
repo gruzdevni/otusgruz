@@ -2,18 +2,16 @@ package user
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 
+	"otusgruz/internal/apperr"
 	"otusgruz/internal/models"
 	query "otusgruz/internal/repo"
 	"otusgruz/pkg/http"
 )
-
-var ErrNoPermission = errors.New("No permission to perform action")
 
 type repo interface {
 	GetUser(ctx context.Context, guid uuid.UUID) (query.User, error)
@@ -42,7 +40,7 @@ func (s *service) GetUser(ctx context.Context, guid uuid.UUID) (*models.UserData
 	ctxUserGUID := http.UserGUIDFromContext(ctx)
 
 	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
-		return nil, ErrNoPermission
+		return nil, apperr.ErrNoPermission
 	}
 
 	res, err := s.repo.GetUser(ctx, guid)
@@ -62,7 +60,7 @@ func (s *service) DeleteUser(ctx context.Context, guid uuid.UUID) (*models.Defau
 	ctxUserGUID := http.UserGUIDFromContext(ctx)
 
 	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
-		return nil, ErrNoPermission
+		return nil, apperr.ErrNoPermission
 	}
 
 	err := s.repo.DeleteUser(ctx, guid)
@@ -80,7 +78,7 @@ func (s *service) UpdateUser(ctx context.Context, guid uuid.UUID, info *models.U
 	ctxUserGUID := http.UserGUIDFromContext(ctx)
 
 	if ctxUserGUID == uuid.Nil || ctxUserGUID != guid {
-		return nil, ErrNoPermission
+		return nil, apperr.ErrNoPermission
 	}
 
 	err := s.repo.UpdateUser(ctx, query.UpdateUserParams{
