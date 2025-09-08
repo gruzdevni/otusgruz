@@ -13,7 +13,7 @@ func (b *Builder) NewAuthClient(doer internalclient.Doer) authHTTP.Client {
 }
 
 func (b *Builder) NewBillClient(doer internalclient.Doer) billhttp.Client {
-	client := billhttp.NewClient(b.config.AuthInternal.HTTPAddress, doer)
+	client := billhttp.NewClient(b.config.BillInternal.HTTPAddress, doer)
 
 	return client
 }
