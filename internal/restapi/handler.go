@@ -5,6 +5,7 @@ import (
 
 	"otusgruz/internal/apperr"
 	"otusgruz/internal/models"
+	"otusgruz/internal/restapi/operations/orders"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 	"otusgruz/internal/service/api/auth"
@@ -139,4 +140,21 @@ func (h *Handler) DeleteUser(params user_c_r_u_d.DeleteUserGUIDParams) middlewar
 	}
 
 	return user_c_r_u_d.NewDeleteUserGUIDOK().WithPayload(res)
+}
+
+func (h *Handler) NewOrder(params orders.PostOrderNewParams) middleware.Responder {
+	var errText string
+	ctx := params.HTTPRequest.Context()
+
+	res, err := h.orderSrv.ProcessOrder(ctx, *params.Request)
+	if err != nil {
+		if errors.Is(err, apperr.ErrNoPermission) {
+			return orders.NewPostOrderNewUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNoPermission.Error()})
+		}
+
+		errText = err.Error()
+		return orders.NewPostOrderNewInternalServerError().WithPayload(&models.Error{Code: 0o3, Message: &errText})
+	}
+
+	return orders.NewPostOrderNewOK().WithPayload(res)
 }

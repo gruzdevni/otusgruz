@@ -7,6 +7,7 @@ import (
 
 	"otusgruz/internal/restapi"
 	"otusgruz/internal/restapi/operations"
+	"otusgruz/internal/restapi/operations/orders"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 	"otusgruz/internal/service/api/auth"
@@ -62,6 +63,9 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	)
 	api.OtherPostPublicSignupHandler = other.PostPublicSignupHandlerFunc(
 		handler.Signup,
+	)
+	api.OrdersPostOrderNewHandler = orders.PostOrderNewHandlerFunc(
+		handler.NewOrder,
 	)
 
 	return api, swaggerSpec, nil
