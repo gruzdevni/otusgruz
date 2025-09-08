@@ -39,7 +39,7 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	billInternalClient := b.NewBillClient(http.DefaultClient)
 
 	userSrv := user.NewService(repo)
-	authSrv := auth.NewService(repo, authInternalClient)
+	authSrv := auth.NewService(repo, authInternalClient, billInternalClient)
 	orderSrv := order.NewService(repo, billInternalClient)
 
 	handler := restapi.NewHandler(userSrv, authSrv, orderSrv)
