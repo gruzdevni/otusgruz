@@ -28,7 +28,7 @@ VALUES ($1, $2, $3, $4, $5, now(), now())
 type CreateOrderParams struct {
 	Guid     uuid.UUID
 	UserGuid uuid.UUID
-	Number   int32
+	Number   string
 	Amount   decimal.Decimal
 	Status   OrderStatus
 }

@@ -3,7 +3,6 @@ package order
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -65,16 +64,13 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 
 	orderAmount := decimal.NewFromFloat(params.Amount)
 
-	orderNumber, err := strconv.Atoi(time.Now().Format("060102150405999"))
-	if err != nil {
-		return nil, fmt.Errorf("making order number: %w", err)
-	}
+	orderNumber := time.Now().Format("060102150405999")
 
 	if balance.GreaterThanOrEqual(orderAmount) {
 		err := s.billClient.ChangeBalanceRequest(ctx, billhttp.OutcomeType, billhttp.ChangeBalanceRequest{
 			UserGUID:     userGUID,
-			OperationRef: fmt.Sprintf("Заказ №%d", orderNumber),
-			Amount:       orderAmount,
+			OperationRef: fmt.Sprintf("Заказ №%s", orderNumber),
+			Amount:       orderAmount.InexactFloat64(),
 		})
 
 		if err == nil {
@@ -85,13 +81,13 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 	err = s.repo.CreateOrder(ctx, query.CreateOrderParams{
 		Guid:     uuid.New(),
 		UserGuid: userGUID,
-		Number:   int32(orderNumber),
+		Number:   orderNumber,
 		Amount:   orderAmount,
 		Status:   orderstatus,
 	})
 
 	return &models.CreatedOrderData{
-			OrderNumber: "01",
+			OrderNumber: orderNumber,
 			Status:      string(orderstatus),
 		},
 		nil

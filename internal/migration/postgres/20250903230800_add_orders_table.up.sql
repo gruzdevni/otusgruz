@@ -7,7 +7,7 @@ CREATE TYPE ORDER_STATUS AS ENUM (
 CREATE TABLE orders(
     guid                UUID PRIMARY KEY        NOT NULL,
     user_guid           UUID                    NOT NULL,
-    number              INTEGER                 NOT NULL,
+    number              VARCHAR(20)             NOT NULL,
     amount              DECIMAL(14, 2)          NOT NULL,
     status              ORDER_STATUS            NOT NULL,
     created_at          TIMESTAMPTZ             NOT NULL DEFAULT now(),

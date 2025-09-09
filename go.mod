@@ -20,7 +20,7 @@ require (
 	github.com/prometheus/client_golang v1.23.0
 	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.51.0
-	github.com/shopspring/decimal v1.2.0
+	github.com/shopspring/decimal v1.3.1
 	github.com/spf13/cobra v1.9.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0
 	go.opentelemetry.io/otel v1.37.0

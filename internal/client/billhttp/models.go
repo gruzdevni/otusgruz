@@ -15,9 +15,9 @@ type UserBalanceResponse struct {
 }
 
 type ChangeBalanceRequest struct {
-	UserGUID     uuid.UUID       `json:"user_guid"`
-	OperationRef string          `json:"operation_ref"`
-	Amount       decimal.Decimal `json:"amount"`
+	UserGUID     uuid.UUID `json:"user_guid"`
+	OperationRef string    `json:"operation_ref"`
+	Amount       float64   `json:"amount"`
 }
 
 type DefaultResponse struct {
