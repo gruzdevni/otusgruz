@@ -64,7 +64,7 @@ func (c *client) GetUserBalanceRequest(ctx context.Context, guid uuid.UUID) (dec
 
 	req, err := http.NewRequestWithContext(
 		ctx,
-		http.MethodPost,
+		http.MethodGet,
 		path,
 		nil,
 	)

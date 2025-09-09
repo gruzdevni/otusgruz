@@ -10,7 +10,7 @@ type User struct {
 }
 
 type UserBalanceResponse struct {
-	GUID   int             `json:"guid"`
+	GUID   uuid.UUID       `json:"guid"`
 	Amount decimal.Decimal `json:"amount"`
 }
 
