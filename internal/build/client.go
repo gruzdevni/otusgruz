@@ -20,7 +20,7 @@ func (b *Builder) NewBillClient(doer internalclient.Doer) billhttp.Client {
 }
 
 func (b *Builder) NewNotifyClient(doer internalclient.Doer) notifyhttp.Client {
-	client := notifyhttp.NewClient(b.config.BillInternal.HTTPAddress, doer)
+	client := notifyhttp.NewClient(b.config.NotifyInternal.HTTPAddress, doer)
 
 	return client
 }
