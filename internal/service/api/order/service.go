@@ -10,6 +10,7 @@ import (
 
 	"otusgruz/internal/apperr"
 	"otusgruz/internal/client/billhttp"
+	"otusgruz/internal/client/notifyhttp"
 	"otusgruz/internal/models"
 	query "otusgruz/internal/repo"
 	"otusgruz/pkg/http"
@@ -25,9 +26,14 @@ type billClient interface {
 	ChangeBalanceRequest(ctx context.Context, operType string, params billhttp.ChangeBalanceRequest) error
 }
 
+type notifyClient interface {
+	CreateNotificationRequest(ctx context.Context, params notifyhttp.CreateNotificationRequest) error
+}
+
 type service struct {
-	repo       repo
-	billClient billClient
+	repo         repo
+	billClient   billClient
+	notifyClient notifyClient
 }
 
 type Service interface {
@@ -36,10 +42,11 @@ type Service interface {
 	// GetBalance(ctx context.Context) (*models.DefaultStatusResponse, error)
 }
 
-func NewService(repo repo, billClient billClient) Service {
+func NewService(repo repo, billClient billClient, notifyClient notifyClient) Service {
 	return &service{
-		repo:       repo,
-		billClient: billClient,
+		repo:         repo,
+		billClient:   billClient,
+		notifyClient: notifyClient,
 	}
 }
 
@@ -56,6 +63,7 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 	}
 
 	orderstatus := query.OrderStatusDraft
+	notifyType := notifyhttp.FailureType
 
 	balance, err := s.billClient.GetUserBalanceRequest(ctx, userGUID)
 	if err != nil {
@@ -63,19 +71,21 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 	}
 
 	orderAmount := decimal.NewFromFloat(params.Amount)
-
-	orderNumber := time.Now().Format("060102150405999")
+	orderNumber := time.Now().Format("060102150405")
+	operationRef := fmt.Sprintf("Заказ №%s", orderNumber)
 
 	if balance.GreaterThanOrEqual(orderAmount) {
 		err := s.billClient.ChangeBalanceRequest(ctx, billhttp.OutcomeType, billhttp.ChangeBalanceRequest{
 			UserGUID:     userGUID,
-			OperationRef: fmt.Sprintf("Заказ №%s", orderNumber),
+			OperationRef: operationRef,
 			Amount:       orderAmount.InexactFloat64(),
 		})
 
 		if err == nil {
 			orderstatus = query.OrderStatusCompleted
+			notifyType = notifyhttp.SuccessType
 		}
+
 	}
 
 	err = s.repo.CreateOrder(ctx, query.CreateOrderParams{
@@ -85,6 +95,18 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 		Amount:   orderAmount,
 		Status:   orderstatus,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("creating new order: %w", err)
+	}
+
+	err = s.notifyClient.CreateNotificationRequest(ctx, notifyhttp.CreateNotificationRequest{
+		UserGUID:     userGUID,
+		OperationRef: operationRef,
+		NotifyType:   notifyType,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating new notification: %w", err)
+	}
 
 	return &models.CreatedOrderData{
 			OrderNumber: orderNumber,
