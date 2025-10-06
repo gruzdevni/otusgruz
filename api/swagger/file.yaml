@@ -314,6 +314,7 @@ definitions:
     required:
       - order_number
       - status
+      - fail_reason
     properties:
       order_number:
         type: string
@@ -325,6 +326,11 @@ definitions:
         description: 'Статус заказа'
         x-omitempty: false
         x-nullable: false
+      fail_reason:
+        type: string
+        description: 'Причина ошибки'
+        x-omitempty: false
+        x-nullable: false        
   UserLogin:
     type: object
     description: Параметры логина

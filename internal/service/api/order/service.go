@@ -89,9 +89,10 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 	orderAmount := decimal.NewFromFloat(params.Amount)
 	orderNumber := time.Now().Format("060102150405")
 	operationRef := fmt.Sprintf("Заказ №%s", orderNumber)
+	failReason := ""
 
 	if err = s.deliveryClient.ReserveDelivery(ctx, orderNumber, params.DeliverySlot); err != nil {
-		return nil, fmt.Errorf("reserving delivery slot: %w", err)
+		failReason = "delivery reserve problem"
 	}
 
 	if err = s.goodsClient.ReserveGoods(ctx, orderNumber, lo.Map(params.Goods, func(item *models.NewOrderGoodsItems0, _ int) goodshttp.Goods {
@@ -105,7 +106,7 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 			return nil, fmt.Errorf("unreserving delivery slot: %w", err)
 		}
 
-		return nil, fmt.Errorf("reserving delivery slot: %w", err)
+		failReason = "goods reserve problem"
 	}
 
 	if balance.GreaterThanOrEqual(orderAmount) {
@@ -128,6 +129,8 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 			if err != nil {
 				return nil, fmt.Errorf("unreserving goods: %w", err)
 			}
+
+			failReason = "billing problem"
 		}
 	} else {
 		err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
@@ -139,6 +142,8 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 		if err != nil {
 			return nil, fmt.Errorf("unreserving goods: %w", err)
 		}
+
+		failReason = "not enough balance"
 	}
 
 	err = s.repo.CreateOrder(ctx, query.CreateOrderParams{
@@ -164,6 +169,7 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 	return &models.CreatedOrderData{
 			OrderNumber: orderNumber,
 			Status:      string(orderstatus),
+			FailReason:  failReason,
 		},
 		nil
 }
