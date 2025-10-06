@@ -7,9 +7,11 @@ import (
 
 	"otusgruz/internal/restapi"
 	"otusgruz/internal/restapi/operations"
+	"otusgruz/internal/restapi/operations/orders"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 	"otusgruz/internal/service/api/auth"
+	"otusgruz/internal/service/api/order"
 	"otusgruz/internal/service/api/user"
 
 	httpMW "otusgruz/pkg/http"
@@ -35,11 +37,14 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	repo := b.NewRepo(psql.DB)
 
 	authInternalClient := b.NewAuthClient(http.DefaultClient)
+	billInternalClient := b.NewBillClient(http.DefaultClient)
+	notifyInternalClient := b.NewNotifyClient(http.DefaultClient)
 
 	userSrv := user.NewService(repo)
-	authSrv := auth.NewService(repo, authInternalClient)
+	authSrv := auth.NewService(repo, authInternalClient, billInternalClient)
+	orderSrv := order.NewService(repo, billInternalClient, notifyInternalClient)
 
-	handler := restapi.NewHandler(userSrv, authSrv)
+	handler := restapi.NewHandler(userSrv, authSrv, orderSrv)
 
 	api.OtherGetPublicHealthHandler = other.GetPublicHealthHandlerFunc(
 		handler.GetHealth,
@@ -59,6 +64,9 @@ func (b *Builder) buildAPI() (*operations.RestServerAPI, *loads.Document, error)
 	)
 	api.OtherPostPublicSignupHandler = other.PostPublicSignupHandlerFunc(
 		handler.Signup,
+	)
+	api.OrdersPostOrderNewHandler = orders.PostOrderNewHandlerFunc(
+		handler.NewOrder,
 	)
 
 	return api, swaggerSpec, nil

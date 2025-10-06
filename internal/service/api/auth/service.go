@@ -26,9 +26,14 @@ type authClient interface {
 	SignupRequest(ctx context.Context, email string, password string) (authhttp.SignupResponse, error)
 }
 
+type billClient interface {
+	CreateUserRequest(ctx context.Context, guid uuid.UUID) error
+}
+
 type service struct {
 	repo       repo
 	authClient authClient
+	billClient billClient
 }
 
 type Service interface {
@@ -36,10 +41,11 @@ type Service interface {
 	Singup(ctx context.Context, params models.UserSignup) (*models.DefaultStatusResponse, error)
 }
 
-func NewService(repo repo, authClient authClient) Service {
+func NewService(repo repo, authClient authClient, billClient billClient) Service {
 	return &service{
 		repo:       repo,
 		authClient: authClient,
+		billClient: billClient,
 	}
 }
 
@@ -76,7 +82,7 @@ func (s *service) Singup(ctx context.Context, params models.UserSignup) (*models
 		return nil, apperr.ErrEmailAlreadyUsed
 	}
 
-	resp, err := s.authClient.SignupRequest(ctx, email, pwd)
+	authResp, err := s.authClient.SignupRequest(ctx, email, pwd)
 	if err != nil {
 		if errors.Is(err, apperr.ErrNotCorrectData) {
 			return nil, apperr.ErrNotCorrectData
@@ -85,10 +91,15 @@ func (s *service) Singup(ctx context.Context, params models.UserSignup) (*models
 		return nil, fmt.Errorf("login request failed: %w", err)
 	}
 
-	zerolog.Ctx(ctx).Info().Any("response", resp).Msg("finished auth client request")
+	zerolog.Ctx(ctx).Info().Any("response", authResp).Msg("finished auth client request")
+
+	err = s.billClient.CreateUserRequest(ctx, authResp.UserGUID)
+	if err != nil {
+		zerolog.Ctx(ctx).Info().Msgf("finished auth bill request with error: %s", err.Error())
+	}
 
 	err = s.repo.InsertUser(ctx, query.InsertUserParams{
-		Guid:       resp.UserGUID,
+		Guid:       authResp.UserGUID,
 		Occupation: occupation,
 		Name:       name,
 		Email:      email,

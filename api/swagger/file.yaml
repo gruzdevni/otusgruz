@@ -15,8 +15,43 @@ tags:
     description: Создание, изменение, удаление пользователя 
   - name: Other
     description: Прочие эндпоинты
+  - name: Orders
+    description: Создание заказа, пополнение счета, просмотр баланса
 
 paths:
+  /order/new:
+    post:
+      summary: Создание заказа пользователя
+      tags:
+        - Orders
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: request
+          description: Параметры заказа
+          required: true
+          schema:
+            $ref: '#/definitions/NewOrder'
+      responses:
+        500:
+          description: Серверная ошибка
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
+        401:
+          description: Клиентская ошибка
+          schema:
+            $ref: '#/definitions/DefaultStatusResponse'
+        200:
+          description: Создание заказа
+          schema:
+            $ref: '#/definitions/CreatedOrderData'
   /user/{guid}:
     get:
       summary: Получение информации по пользователю
@@ -230,6 +265,41 @@ definitions:
         type: string
         description: 'Место работы'
         example: "МУП ДЭС"
+        x-omitempty: false
+        x-nullable: false
+  NewOrder:
+    type: object
+    description: Параметры нового заказа
+    required:
+      - user_guid
+      - amount
+    properties:
+      user_guid:
+        type: string
+        format: uuid
+        x-omitempty: false
+        x-nullable: false
+      amount:
+        type: number
+        format: double
+        description: 'Сумма заказа'
+        x-omitempty: false
+        x-nullable: false
+  CreatedOrderData:
+    type: object
+    description: Параметры созданного заказа
+    required:
+      - order_number
+      - status
+    properties:
+      order_number:
+        type: string
+        description: 'Номер заказа'
+        x-omitempty: false
+        x-nullable: false
+      status:
+        type: string
+        description: 'Статус заказа'
         x-omitempty: false
         x-nullable: false
   UserLogin:

@@ -5,9 +5,11 @@ import (
 
 	"otusgruz/internal/apperr"
 	"otusgruz/internal/models"
+	"otusgruz/internal/restapi/operations/orders"
 	"otusgruz/internal/restapi/operations/other"
 	"otusgruz/internal/restapi/operations/user_c_r_u_d"
 	"otusgruz/internal/service/api/auth"
+	"otusgruz/internal/service/api/order"
 	"otusgruz/internal/service/api/user"
 
 	"github.com/go-openapi/runtime/middleware"
@@ -16,14 +18,16 @@ import (
 )
 
 type Handler struct {
-	userSrv user.Service
-	authSrv auth.Service
+	userSrv  user.Service
+	authSrv  auth.Service
+	orderSrv order.Service
 }
 
-func NewHandler(userSrv user.Service, authSrv auth.Service) *Handler {
+func NewHandler(userSrv user.Service, authSrv auth.Service, orderSrv order.Service) *Handler {
 	return &Handler{
-		userSrv: userSrv,
-		authSrv: authSrv,
+		userSrv:  userSrv,
+		authSrv:  authSrv,
+		orderSrv: orderSrv,
 	}
 }
 
@@ -81,8 +85,8 @@ func (h *Handler) GetUser(params user_c_r_u_d.GetUserGUIDParams) middleware.Resp
 
 	res, err := h.userSrv.GetUser(ctx, userGUID)
 	if err != nil {
-		if errors.Is(err, user.ErrNoPermission) {
-			return user_c_r_u_d.NewGetUserGUIDForbidden().WithPayload(&models.DefaultStatusResponse{Message: user.ErrNoPermission.Error()})
+		if errors.Is(err, apperr.ErrNoPermission) {
+			return user_c_r_u_d.NewGetUserGUIDForbidden().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNoPermission.Error()})
 		}
 
 		errText = err.Error()
@@ -98,8 +102,8 @@ func (h *Handler) UpdateUser(params user_c_r_u_d.PatchUserGUIDParams) middleware
 
 	userGUID, err := uuid.Parse(params.GUID.String())
 	if err != nil {
-		if errors.Is(err, user.ErrNoPermission) {
-			return user_c_r_u_d.NewPatchUserGUIDForbidden().WithPayload(&models.DefaultStatusResponse{Message: user.ErrNoPermission.Error()})
+		if errors.Is(err, apperr.ErrNoPermission) {
+			return user_c_r_u_d.NewPatchUserGUIDForbidden().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNoPermission.Error()})
 		}
 
 		errText = err.Error()
@@ -121,8 +125,8 @@ func (h *Handler) DeleteUser(params user_c_r_u_d.DeleteUserGUIDParams) middlewar
 
 	userGUID, err := uuid.Parse(params.GUID.String())
 	if err != nil {
-		if errors.Is(err, user.ErrNoPermission) {
-			return user_c_r_u_d.NewDeleteUserGUIDForbidden().WithPayload(&models.DefaultStatusResponse{Message: user.ErrNoPermission.Error()})
+		if errors.Is(err, apperr.ErrNoPermission) {
+			return user_c_r_u_d.NewDeleteUserGUIDForbidden().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNoPermission.Error()})
 		}
 
 		errText = err.Error()
@@ -136,4 +140,21 @@ func (h *Handler) DeleteUser(params user_c_r_u_d.DeleteUserGUIDParams) middlewar
 	}
 
 	return user_c_r_u_d.NewDeleteUserGUIDOK().WithPayload(res)
+}
+
+func (h *Handler) NewOrder(params orders.PostOrderNewParams) middleware.Responder {
+	var errText string
+	ctx := params.HTTPRequest.Context()
+
+	res, err := h.orderSrv.ProcessOrder(ctx, *params.Request)
+	if err != nil {
+		if errors.Is(err, apperr.ErrNoPermission) {
+			return orders.NewPostOrderNewUnauthorized().WithPayload(&models.DefaultStatusResponse{Message: apperr.ErrNoPermission.Error()})
+		}
+
+		errText = err.Error()
+		return orders.NewPostOrderNewInternalServerError().WithPayload(&models.Error{Code: 0o3, Message: &errText})
+	}
+
+	return orders.NewPostOrderNewOK().WithPayload(res)
 }
