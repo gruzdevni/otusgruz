@@ -7,6 +7,7 @@ package models
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
@@ -23,6 +24,14 @@ type NewOrder struct {
 	// Required: true
 	Amount float64 `json:"amount"`
 
+	// Идентификатор слота на доставку
+	// Required: true
+	DeliverySlot string `json:"delivery_slot"`
+
+	// goods
+	// Required: true
+	Goods []*NewOrderGoodsItems0 `json:"goods"`
+
 	// user guid
 	// Required: true
 	// Format: uuid
@@ -34,6 +43,14 @@ func (m *NewOrder) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateAmount(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateDeliverySlot(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateGoods(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -56,6 +73,42 @@ func (m *NewOrder) validateAmount(formats strfmt.Registry) error {
 	return nil
 }
 
+func (m *NewOrder) validateDeliverySlot(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("delivery_slot", "body", m.DeliverySlot); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *NewOrder) validateGoods(formats strfmt.Registry) error {
+
+	if err := validate.Required("goods", "body", m.Goods); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Goods); i++ {
+		if swag.IsZero(m.Goods[i]) { // not required
+			continue
+		}
+
+		if m.Goods[i] != nil {
+			if err := m.Goods[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("goods" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("goods" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
 func (m *NewOrder) validateUserGUID(formats strfmt.Registry) error {
 
 	if err := validate.Required("user_guid", "body", strfmt.UUID(m.UserGUID)); err != nil {
@@ -69,8 +122,42 @@ func (m *NewOrder) validateUserGUID(formats strfmt.Registry) error {
 	return nil
 }
 
-// ContextValidate validates this new order based on context it is used
+// ContextValidate validate this new order based on the context it is used
 func (m *NewOrder) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.contextValidateGoods(ctx, formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *NewOrder) contextValidateGoods(ctx context.Context, formats strfmt.Registry) error {
+
+	for i := 0; i < len(m.Goods); i++ {
+
+		if m.Goods[i] != nil {
+
+			if swag.IsZero(m.Goods[i]) { // not required
+				return nil
+			}
+
+			if err := m.Goods[i].ContextValidate(ctx, formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("goods" + "." + strconv.Itoa(i))
+				} else if ce, ok := err.(*errors.CompositeError); ok {
+					return ce.ValidateName("goods" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 
@@ -85,6 +172,47 @@ func (m *NewOrder) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary interface implementation
 func (m *NewOrder) UnmarshalBinary(b []byte) error {
 	var res NewOrder
+	if err := swag.ReadJSON(b, &res); err != nil {
+		return err
+	}
+	*m = res
+	return nil
+}
+
+// NewOrderGoodsItems0 new order goods items0
+//
+// swagger:model NewOrderGoodsItems0
+type NewOrderGoodsItems0 struct {
+
+	// Идентификатор товара
+	// Example: 2
+	Nomenclature string `json:"nomenclature"`
+
+	// количество товара
+	Quantity int64 `json:"quantity"`
+}
+
+// Validate validates this new order goods items0
+func (m *NewOrderGoodsItems0) Validate(formats strfmt.Registry) error {
+	return nil
+}
+
+// ContextValidate validates this new order goods items0 based on context it is used
+func (m *NewOrderGoodsItems0) ContextValidate(ctx context.Context, formats strfmt.Registry) error {
+	return nil
+}
+
+// MarshalBinary interface implementation
+func (m *NewOrderGoodsItems0) MarshalBinary() ([]byte, error) {
+	if m == nil {
+		return nil, nil
+	}
+	return swag.WriteJSON(m)
+}
+
+// UnmarshalBinary interface implementation
+func (m *NewOrderGoodsItems0) UnmarshalBinary(b []byte) error {
+	var res NewOrderGoodsItems0
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

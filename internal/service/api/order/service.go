@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 
 	"otusgruz/internal/apperr"
 	"otusgruz/internal/client/billhttp"
+	"otusgruz/internal/client/goodshttp"
 	"otusgruz/internal/client/notifyhttp"
 	"otusgruz/internal/models"
 	query "otusgruz/internal/repo"
@@ -30,10 +32,22 @@ type notifyClient interface {
 	CreateNotificationRequest(ctx context.Context, params notifyhttp.CreateNotificationRequest) error
 }
 
+type deliveryClient interface {
+	ReserveDelivery(ctx context.Context, orderID string, slotID string) error
+	UnreserveDelivery(ctx context.Context, orderID string) error
+}
+
+type goodsClient interface {
+	ReserveGoods(ctx context.Context, orderID string, goods []goodshttp.Goods) error
+	UnreserveGoods(ctx context.Context, orderID string) error
+}
+
 type service struct {
-	repo         repo
-	billClient   billClient
-	notifyClient notifyClient
+	repo           repo
+	billClient     billClient
+	notifyClient   notifyClient
+	deliveryClient deliveryClient
+	goodsClient    goodsClient
 }
 
 type Service interface {
@@ -42,11 +56,13 @@ type Service interface {
 	// GetBalance(ctx context.Context) (*models.DefaultStatusResponse, error)
 }
 
-func NewService(repo repo, billClient billClient, notifyClient notifyClient) Service {
+func NewService(repo repo, billClient billClient, notifyClient notifyClient, deliveryClient deliveryClient, goodsClient goodsClient) Service {
 	return &service{
-		repo:         repo,
-		billClient:   billClient,
-		notifyClient: notifyClient,
+		repo:           repo,
+		billClient:     billClient,
+		notifyClient:   notifyClient,
+		deliveryClient: deliveryClient,
+		goodsClient:    goodsClient,
 	}
 }
 
@@ -74,6 +90,24 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 	orderNumber := time.Now().Format("060102150405")
 	operationRef := fmt.Sprintf("Заказ №%s", orderNumber)
 
+	if err = s.deliveryClient.ReserveDelivery(ctx, orderNumber, params.DeliverySlot); err != nil {
+		return nil, fmt.Errorf("reserving delivery slot: %w", err)
+	}
+
+	if err = s.goodsClient.ReserveGoods(ctx, orderNumber, lo.Map(params.Goods, func(item *models.NewOrderGoodsItems0, _ int) goodshttp.Goods {
+		return goodshttp.Goods{
+			Nomenclature: item.Nomenclature,
+			Quantity:     int(item.Quantity),
+		}
+	})); err != nil {
+		err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
+		if err != nil {
+			return nil, fmt.Errorf("unreserving delivery slot: %w", err)
+		}
+
+		return nil, fmt.Errorf("reserving delivery slot: %w", err)
+	}
+
 	if balance.GreaterThanOrEqual(orderAmount) {
 		err := s.billClient.ChangeBalanceRequest(ctx, billhttp.OutcomeType, billhttp.ChangeBalanceRequest{
 			UserGUID:     userGUID,
@@ -84,8 +118,27 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 		if err == nil {
 			orderstatus = query.OrderStatusCompleted
 			notifyType = notifyhttp.SuccessType
+		} else {
+			err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
+			if err != nil {
+				return nil, fmt.Errorf("unreserving delivery slot: %w", err)
+			}
+
+			err = s.goodsClient.UnreserveGoods(ctx, orderNumber)
+			if err != nil {
+				return nil, fmt.Errorf("unreserving goods: %w", err)
+			}
+		}
+	} else {
+		err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
+		if err != nil {
+			return nil, fmt.Errorf("unreserving delivery slot: %w", err)
 		}
 
+		err = s.goodsClient.UnreserveGoods(ctx, orderNumber)
+		if err != nil {
+			return nil, fmt.Errorf("unreserving goods: %w", err)
+		}
 	}
 
 	err = s.repo.CreateOrder(ctx, query.CreateOrderParams{

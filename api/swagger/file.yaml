@@ -273,6 +273,8 @@ definitions:
     required:
       - user_guid
       - amount
+      - delivery_slot
+      - goods
     properties:
       user_guid:
         type: string
@@ -285,6 +287,27 @@ definitions:
         description: 'Сумма заказа'
         x-omitempty: false
         x-nullable: false
+      delivery_slot:
+        type: string
+        description: 'Идентификатор слота на доставку'
+        x-omitempty: false
+        x-nullable: false
+      goods:
+        type: array
+        items:
+          type: object
+          properties:
+            nomenclature:
+              type: string
+              description: 'Идентификатор товара'
+              example: "2"
+              x-omitempty: false
+              x-nullable: false
+            quantity:
+              type: integer
+              description: 'количество товара'
+              x-omitempty: false
+              x-nullable: false
   CreatedOrderData:
     type: object
     description: Параметры созданного заказа

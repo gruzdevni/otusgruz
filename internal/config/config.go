@@ -10,12 +10,14 @@ import (
 )
 
 type Config struct {
-	App            App
-	HTTP           HTTP
-	Postgres       Postgres
-	AuthInternal   AuthInternal
-	BillInternal   BillInternal
-	NotifyInternal NotifyInternal
+	App              App
+	HTTP             HTTP
+	Postgres         Postgres
+	AuthInternal     AuthInternal
+	BillInternal     BillInternal
+	NotifyInternal   NotifyInternal
+	DeliveryInternal DeliveryInternal
+	GoodsInternal    GoodsInternal
 }
 
 type appEnv string
@@ -46,6 +48,14 @@ type BillInternal struct {
 
 type NotifyInternal struct {
 	HTTPAddress string `envconfig:"NOTIFY_HTTP_ADDRESS" default:"http://notify.internal/"`
+}
+
+type DeliveryInternal struct {
+	HTTPAddress string `envconfig:"DELIVERY_HTTP_ADDRESS" default:"http://delivery.internal/"`
+}
+
+type GoodsInternal struct {
+	HTTPAddress string `envconfig:"GOODS_HTTP_ADDRESS" default:"http://goods.internal/"`
 }
 
 func Load() (Config, error) {
