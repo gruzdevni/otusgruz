@@ -78,47 +78,65 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 		return nil, apperr.ErrNoPermission
 	}
 
-	orderstatus := query.OrderStatusDraft
-	notifyType := notifyhttp.FailureType
-
 	balance, err := s.billClient.GetUserBalanceRequest(ctx, userGUID)
 	if err != nil {
 		return nil, fmt.Errorf("getting user balance: %w", err)
 	}
 
+	orderstatus := query.OrderStatusDraft
+	notifyType := notifyhttp.FailureType
 	orderAmount := decimal.NewFromFloat(params.Amount)
 	orderNumber := time.Now().Format("060102150405")
 	operationRef := fmt.Sprintf("Заказ №%s", orderNumber)
 	failReason := ""
+	isNeedToStopProccess := false
 
 	if err = s.deliveryClient.ReserveDelivery(ctx, orderNumber, params.DeliverySlot); err != nil {
 		failReason = "delivery reserve problem"
+		isNeedToStopProccess = true
 	}
 
-	if err = s.goodsClient.ReserveGoods(ctx, orderNumber, lo.Map(params.Goods, func(item *models.NewOrderGoodsItems0, _ int) goodshttp.Goods {
-		return goodshttp.Goods{
-			Nomenclature: item.Nomenclature,
-			Quantity:     int(item.Quantity),
-		}
-	})); err != nil {
-		err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
-		if err != nil {
-			return nil, fmt.Errorf("unreserving delivery slot: %w", err)
-		}
+	if !isNeedToStopProccess {
+		if err = s.goodsClient.ReserveGoods(ctx, orderNumber, lo.Map(params.Goods, func(item *models.NewOrderGoodsItems0, _ int) goodshttp.Goods {
+			return goodshttp.Goods{
+				Nomenclature: item.Nomenclature,
+				Quantity:     int(item.Quantity),
+			}
+		})); err != nil {
+			err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
+			if err != nil {
+				return nil, fmt.Errorf("unreserving delivery slot: %w", err)
+			}
 
-		failReason = "goods reserve problem"
+			failReason = "goods reserve problem"
+			isNeedToStopProccess = true
+		}
 	}
 
-	if balance.GreaterThanOrEqual(orderAmount) {
-		err := s.billClient.ChangeBalanceRequest(ctx, billhttp.OutcomeType, billhttp.ChangeBalanceRequest{
-			UserGUID:     userGUID,
-			OperationRef: operationRef,
-			Amount:       orderAmount.InexactFloat64(),
-		})
+	if !isNeedToStopProccess {
+		if balance.GreaterThanOrEqual(orderAmount) {
+			err := s.billClient.ChangeBalanceRequest(ctx, billhttp.OutcomeType, billhttp.ChangeBalanceRequest{
+				UserGUID:     userGUID,
+				OperationRef: operationRef,
+				Amount:       orderAmount.InexactFloat64(),
+			})
 
-		if err == nil {
-			orderstatus = query.OrderStatusCompleted
-			notifyType = notifyhttp.SuccessType
+			if err == nil {
+				orderstatus = query.OrderStatusCompleted
+				notifyType = notifyhttp.SuccessType
+			} else {
+				err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
+				if err != nil {
+					return nil, fmt.Errorf("unreserving delivery slot: %w", err)
+				}
+
+				err = s.goodsClient.UnreserveGoods(ctx, orderNumber)
+				if err != nil {
+					return nil, fmt.Errorf("unreserving goods: %w", err)
+				}
+
+				failReason = "billing problem"
+			}
 		} else {
 			err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
 			if err != nil {
@@ -130,20 +148,8 @@ func (s *service) ProcessOrder(ctx context.Context, params models.NewOrder) (*mo
 				return nil, fmt.Errorf("unreserving goods: %w", err)
 			}
 
-			failReason = "billing problem"
+			failReason = "not enough balance"
 		}
-	} else {
-		err = s.deliveryClient.UnreserveDelivery(ctx, orderNumber)
-		if err != nil {
-			return nil, fmt.Errorf("unreserving delivery slot: %w", err)
-		}
-
-		err = s.goodsClient.UnreserveGoods(ctx, orderNumber)
-		if err != nil {
-			return nil, fmt.Errorf("unreserving goods: %w", err)
-		}
-
-		failReason = "not enough balance"
 	}
 
 	err = s.repo.CreateOrder(ctx, query.CreateOrderParams{
